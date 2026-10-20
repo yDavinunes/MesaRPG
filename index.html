@@ -257,19 +257,22 @@ aside{background:linear-gradient(180deg,#0b1b4a,#0a1438);border-right:0;box-shad
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
-/* ===== CONFIGURACAO DO FIREBASE: troque os COLE_AQUI pelos dados do seu projeto ===== */
+/* ===== CONFIGURACAO DO FIREBASE ===== */
 var FIREBASE_CONFIG={apiKey:"AIzaSyB2guWDWtowbUWZazLfj9X1yKyhPoo-Xvc",authDomain:"rpgnocontrol.firebaseapp.com",projectId:"rpgnocontrol",appId:"1:1040835457753:web:d3df52a38f13ef6bbdc4c8"};
-/* ===== Fim da configuracao. Nao precisa mexer no resto deste bloco. ===== */
+/* Dominio ficticio usado para transformar o usuario em e-mail. Nao precisa existir. */
+var DOMINIO_USUARIO="@mesarpg.app";
+/* ===== Fim da configuracao. ===== */
 if(FIREBASE_CONFIG.apiKey!=="COLE_AQUI"&&window.firebase){
   firebase.initializeApp(FIREBASE_CONFIG);
   var auth=firebase.auth(),fdb=firebase.firestore();
-  window.sair=function(){auth.signOut().then(function(){location.reload();});};
-  window.criarConta=function(nome,email,senha,perfil){
+  window.sair=function(){try{localStorage.removeItem('mesa-rpg-v1');}catch(e){}auth.signOut().then(function(){location.reload();});};
+  window.mudarSenha=function(nova){return auth.currentUser.updatePassword(nova);};
+  window.criarConta=function(nome,usuario,senha,perfil){
     var app2;try{app2=firebase.app('sec');}catch(e){app2=firebase.initializeApp(FIREBASE_CONFIG,'sec');}
     var a2=app2.auth();
-    return a2.createUserWithEmailAndPassword(email,senha).then(function(cr){
+    return a2.createUserWithEmailAndPassword(usuario+DOMINIO_USUARIO,senha).then(function(cr){
       var uid=cr.user.uid;
-      return a2.signOut().then(function(){return fdb.doc('users/'+uid).set({name:nome,role:perfil,created:Date.now()});}).then(function(){return uid;});
+      return a2.signOut().then(function(){return fdb.doc('users/'+uid).set({name:nome,username:usuario,role:perfil,created:Date.now()});}).then(function(){return uid;});
     });
   };
   var loginUi=function(m){
@@ -278,19 +281,23 @@ if(FIREBASE_CONFIG.apiKey!=="COLE_AQUI"&&window.firebase){
     w.style.cssText='position:fixed;inset:0;z-index:99;display:grid;place-items:center;background:rgba(8,16,48,.78);padding:16px';
     var inp='padding:10px;border:1px solid #cbd5e1;border-radius:10px;font:16px sans-serif';
     w.innerHTML='<form id="lgf" style="background:#fff;color:#0f1c3f;border-radius:20px;padding:24px;width:100%;max-width:340px;font:16px sans-serif;display:grid;gap:10px"><b style="font-size:1.2rem">Mesa RPG</b>'+
-      '<input id="lge" type="email" placeholder="E-mail" required style="'+inp+'">'+
-      '<input id="lgp" type="password" placeholder="Senha" required style="'+inp+'">'+
+      '<input id="lge" type="text" placeholder="Usuário" required autocapitalize="none" autocomplete="username" style="'+inp+'">'+
+      '<input id="lgp" type="password" placeholder="Senha" required autocomplete="current-password" style="'+inp+'">'+
       '<div id="lgm" style="color:#be123c;font-size:.85rem;min-height:1em"></div>'+
       '<button type="submit" style="padding:12px;border:0;border-radius:12px;background:#2563eb;color:#fff;font-weight:700;cursor:pointer">Entrar</button>'+
       '<button type="button" id="lgr" style="border:0;background:none;color:#2563eb;cursor:pointer">Esqueci a senha</button></form>';
     document.body.appendChild(w);
     var msg=function(t){document.getElementById('lgm').textContent=t;};
     if(m)msg(m);
-    var E=function(){return document.getElementById('lge').value.trim();};
-    var M={'auth/invalid-credential':'E-mail ou senha incorretos.','auth/user-not-found':'E-mail ou senha incorretos.','auth/wrong-password':'E-mail ou senha incorretos.','auth/invalid-email':'E-mail invalido.','auth/too-many-requests':'Muitas tentativas. Espere um pouco.'};
+    var E=function(){var v=document.getElementById('lge').value.trim();return v.indexOf('@')>-1?v:v.toLowerCase()+DOMINIO_USUARIO;};
+    var M={'auth/invalid-credential':'Usuario ou senha incorretos.','auth/user-not-found':'Usuario ou senha incorretos.','auth/wrong-password':'Usuario ou senha incorretos.','auth/invalid-email':'Usuario invalido.','auth/too-many-requests':'Muitas tentativas. Espere um pouco.'};
     var fail=function(e){msg(M[e.code]||'Nao foi possivel entrar. Tente de novo.');};
     document.getElementById('lgf').onsubmit=function(ev){ev.preventDefault();msg('');auth.signInWithEmailAndPassword(E(),document.getElementById('lgp').value).catch(fail);};
-    document.getElementById('lgr').onclick=function(){if(!E()){msg('Digite seu e-mail.');return;}auth.sendPasswordResetEmail(E()).then(function(){msg('Enviamos um e-mail para redefinir a senha.');}).catch(fail);};
+    document.getElementById('lgr').onclick=function(){
+      var v=document.getElementById('lge').value.trim();
+      if(v.indexOf('@')<0){msg('Para recuperar o acesso, peça ao administrador.');return;}
+      auth.sendPasswordResetEmail(v).then(function(){msg('Enviamos um e-mail para redefinir a senha.');}).catch(fail);
+    };
   };
   var noAccess=function(){auth.signOut().then(function(){loginUi('Esta conta nao tem acesso. Fale com o administrador.');});};
   var userP=new Promise(function(res){
@@ -303,7 +310,7 @@ if(FIREBASE_CONFIG.apiKey!=="COLE_AQUI"&&window.firebase){
         var b=document.getElementById('lg');if(b)b.remove();
         ref.onSnapshot(function(y){
           if(!y.exists){auth.signOut().then(function(){location.reload();});return;}
-          var d=y.data()||{},old=window.ROLE;window.ROLE=d.role||'leitor';window.MYNAME=d.name||'Jogador';
+          var d=y.data()||{},old=window.ROLE;window.ROLE=d.role||'leitor';window.MYNAME=d.name||'Jogador';window.ACCT=d.username||u.uid;
           if(first){first=false;res(u);}else if(old!==window.ROLE&&typeof render==='function')render();
         });
       }).catch(function(){noAccess();});
@@ -323,7 +330,7 @@ if(FIREBASE_CONFIG.apiKey!=="COLE_AQUI"&&window.firebase){
 var K='mesa-rpg-v1',S=null;
 try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
 S=S||{chars:[],open:[],active:null,log:[]};S.rooms=S.rooms||[];S.room=S.room||null;var DB=null,R=[],unsub=null,toastT=null,delId=null;
-var save=function(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}syncSoon();actSoon();};
+var save=function(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}syncSoon();actSoon();cloudSoon();};
 var esc=function(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
 var AT=[['des','Destreza'],['int','Intuição'],['vig','Vigor'],['von','Vontade']];
 var ST=['Lento','Tonto','Fraco','Abalado','Enfurecido','Envenenado'];
@@ -348,6 +355,7 @@ function render(){
   S.rooms.forEach(function(r){s+='<button class="nv'+(S.active==='r:'+r.code?' on':'')+'" data-act="room" data-id="'+r.code+'"><span class="av">'+ic('hall')+'</span><span class="nm">'+esc(r.name)+'</span></button>';});
   s+='<button class="nv'+(S.active==='rooms'?' on':'')+'" data-act="rooms">'+ic('plus')+'Criar ou entrar em sala</button>';
   if(can('admin')&&DB)s+='<div class="sec">Administração</div><button class="nv'+(S.active==='admin'?' on':'')+'" data-act="admin">'+ic('shield')+'Contas e atualizações<span id="abdg" class="bdg" style="display:none"></span></button>';
+  if(window.mudarSenha)s+='<button class="nv" data-act="pw">'+ic('pen')+'Alterar minha senha</button>';
   if(window.sair)s+='<button class="nv" data-act="logout">'+ic('users')+'Sair da conta</button>';
   document.getElementById('side').innerHTML=s;bdg();
   var rm=S.active&&S.active.indexOf('r:')===0?S.rooms.filter(function(r){return 'r:'+r.code===S.active})[0]:null;
@@ -476,7 +484,7 @@ function subm(){
     us.push(DB.doc(P).onSnapshot(function(s){ROOM=s.data()||{};rr();if(S.active&&S.active.indexOf('r:')===0&&document.activeElement.tagName!=='TEXTAREA')render();},function(){}));
     if(UID){DB.doc(P+'/members/'+UID).set({t:Date.now()}).catch(function(){});
       us.push(DB.collection(P+'/members').onSnapshot(function(q){RM=q.docs.map(function(x){return x.id});if(UR&&RM.length)UR.profiles(RM).then(function(ps){NM=ps||{};rr();});else rr();},function(){}));
-      us.push(DB.collection(P+'/sheets').onSnapshot(function(q){SH=q.docs.map(function(x){var v=x.data();v.id=x.id;return v});var add=0;SH.forEach(function(v){if(v.owner===UID&&v.char&&!get(v.char.id)){v.char.rem=S.room;S.chars.push(v.char);add++;}});if(add){save();render();}else rr();},function(){}));}
+      us.push(DB.collection(P+'/sheets').onSnapshot(function(q){SH=q.docs.map(function(x){var v=x.data();v.id=x.id;return v});var add=0;SH.forEach(function(v){if(v.owner===UID&&v.char&&!get(v.char.id)&&!(S.del&&S.del[v.char.id])){v.char.rem=S.room;S.chars.push(v.char);pushCloud(v.char);add++;}});if(add){save();render();}else rr();},function(){}));}
   }catch(e){}
 }
 function rr(){if(S.active&&S.active.indexOf('r:')===0&&rtab==='mesa'){var e=document.getElementById('mesa');if(e)e.innerHTML=mesaUi();}}
@@ -520,13 +528,40 @@ function subAdmin(){
 }
 function bdg(){if(S.active==='admin'&&atab==='feed')S.seen=Date.now();var n=ACT.filter(function(e){return e.ts>(S.seen||0)&&e.uid!==UID}).length,b=document.getElementById('abdg');if(b){b.textContent=n;b.style.display=n?'inline-block':'none';}}
 function feedBody(){return ACT.length?ACT.map(function(e){return '<div class="lr">'+ic(e.type==='sala'?'hall':e.type==='conta'?'users':'scroll')+'<span class="rl"><b>'+esc(e.name)+'</b> '+esc(e.txt)+'</span><span class="tm">'+tm(e.ts)+'</span></div>'}).join('<hr class="hr">'):'<p class="note">Nenhuma atualização ainda.</p>';}
-function admBody(){return USERS.length?USERS.slice().sort(function(a,b){return String(a.name).localeCompare(String(b.name))}).map(function(u){return '<div class="item" style="grid-template-columns:1fr auto auto"><div><b>'+esc(u.name||'Sem nome')+'</b><div class="note">'+esc(String(u.id).slice(0,8))+(u.id===UID?' · você':'')+'</div></div><select class="in" data-role="'+u.id+'">'+['leitor','player','mestre','admin'].map(function(r){return'<option value="'+r+'"'+((u.role||'leitor')===r?' selected':'')+'>'+r+'</option>'}).join('')+'</select>'+(u.id===UID?'<span></span>':'<button class="btn bad sm" data-act="rmacc" data-id="'+u.id+'">Remover acesso</button>')+'</div>'}).join(''):'<p class="note">Carregando...</p>';}
+function admBody(){return USERS.length?USERS.slice().sort(function(a,b){return String(a.name).localeCompare(String(b.name))}).map(function(u){return '<div class="item" style="grid-template-columns:1fr auto auto"><div><b>'+esc(u.name||'Sem nome')+'</b><div class="note">'+esc(u.username||String(u.id).slice(0,8))+(u.id===UID?' · você':'')+'</div></div><select class="in" data-role="'+u.id+'">'+['leitor','player','mestre','admin'].map(function(r){return'<option value="'+r+'"'+((u.role||'leitor')===r?' selected':'')+'>'+r+'</option>'}).join('')+'</select>'+(u.id===UID?'<span></span>':'<button class="btn bad sm" data-act="rmacc" data-id="'+u.id+'">Remover acesso</button>')+'</div>'}).join(''):'<p class="note">Carregando...</p>';}
 function adminUi(){
   var tb=[['contas','Contas'],['feed','Atualizações']].map(function(t){return'<button class="tb'+(atab===t[0]?' on':'')+'" data-act="atab" data-t="'+t[0]+'">'+t[1]+'</button>'}).join('');
   var body=atab==='feed'?'<div class="cd"><h3>Atualizações</h3><div id="feed">'+feedBody()+'</div></div>':
-    '<div class="cd"><h3>Criar conta</h3><div class="row"><div><label>Nome</label><input class="in" id="cn" maxlength="40"></div><div><label>E-mail</label><input class="in" id="ce" type="email"></div><div><label>Senha (mínimo 6)</label><input class="in" id="cs" type="text" autocomplete="off"></div><div><label>Perfil</label><select class="in" id="cp"><option>player</option><option>leitor</option><option>mestre</option><option>admin</option></select></div></div><div class="dice"><button class="btn" data-act="mkconta">Criar conta</button></div><p class="note">Anote a senha e passe ao jogador. Depois de criada ela não aparece mais aqui.</p></div>'+
+    '<div class="cd"><h3>Criar conta</h3><div class="row"><div><label>Nome</label><input class="in" id="cn" maxlength="40"></div><div><label>Usuário (sem espaços)</label><input class="in" id="ce" maxlength="20" autocomplete="off"></div><div><label>Senha (mínimo 8)</label><input class="in" id="cs" type="text" autocomplete="off"></div><div><label>Perfil</label><select class="in" id="cp"><option>player</option><option>leitor</option><option>mestre</option><option>admin</option></select></div></div><div class="dice"><button class="btn" data-act="mkconta">Criar conta</button></div><p class="note">Anote a senha e passe ao jogador. Depois de criada ela não aparece mais aqui.</p></div>'+
     '<div class="cd"><h3>Contas e perfis</h3><p class="note">Leitor só visualiza. Player cria fichas, entra nas salas e rola dados. Mestre também cria salas e entrega fichas. Admin pode tudo.</p><div id="adm">'+admBody()+'</div></div>';
   return '<div class="tabs2">'+tb+'</div>'+body;
+}
+var cfu=null,CL={},cfT=null;
+function cloudSoon(){clearTimeout(cfT);cfT=setTimeout(function(){var c=S.active&&get(S.active);if(c)pushCloud(c);},1200);}
+function pushCloud(c){
+  if(!DB||!window.ACCT||!can('player'))return;
+  var o=JSON.parse(JSON.stringify(c));delete o.upd;var j=JSON.stringify(o);
+  if(CL[c.id]===j)return;CL[c.id]=j;
+  c.upd=Date.now();o.upd=c.upd;
+  DB.doc('contas/'+window.ACCT+'/fichas/'+c.id).set(o).catch(function(){CL[c.id]=null;toast('Não foi possível salvar a ficha na conta.');});
+}
+function cloudDel(c){if(!DB||!window.ACCT||!can('player'))return;delete CL[c.id];DB.doc('contas/'+window.ACCT+'/fichas/'+c.id).delete().catch(function(){});}
+function subCloud(){
+  if(cfu){cfu();cfu=null;}
+  if(!DB||!window.ACCT||!can('player'))return;
+  if(S.acct&&S.acct!==window.ACCT){S.chars=[];S.open=[];S.active=null;S.rooms=[];S.room=null;S.log=[];S.mn={};S.mlog=[];}
+  S.acct=window.ACCT;
+  var first=true;
+  cfu=DB.collection('contas/'+window.ACCT+'/fichas').onSnapshot(function(q){
+    var ch=false,ids={};
+    q.docs.forEach(function(x){var r=x.data(),c=get(x.id),o=JSON.parse(JSON.stringify(r));ids[x.id]=1;delete o.upd;CL[x.id]=JSON.stringify(o);
+      if(!c){S.chars.push(r);ch=true;}
+      else if((r.upd||0)>(c.upd||0)){Object.keys(c).forEach(function(k){delete c[k]});Object.assign(c,r);ch=true;}
+    });
+    if(first){first=false;S.chars.forEach(function(c){if(!ids[c.id])pushCloud(c);});}
+    else q.docChanges().forEach(function(d){if(d.type==='removed'){var i=S.chars.map(function(c){return c.id}).indexOf(d.doc.id);if(i>-1){S.chars.splice(i,1);S.open=S.open.filter(function(x){return x!==d.doc.id});if(S.active===d.doc.id)S.active=null;ch=true;}}});
+    if(ch){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}render();}
+  },function(){});
 }
 function tabsHtml(){return '<div class="tabs2">'+TABS.map(function(t){return'<button class="tb'+(stab===t[0]?' on':'')+'" data-act="stab" data-t="'+t[0]+'">'+ic(TI[t[0]])+t[1]+'</button>'}).join('')+'</div>';}
 function eqUiOld(c){
@@ -605,13 +640,14 @@ document.addEventListener('click',function(e){
   else if(act==='rooms')S.active='rooms';
   else if(act==='admin'){S.active='admin';subAdmin();}
   else if(act==='atab'){atab=b.dataset.t;}
+  else if(act==='pw'){var np=prompt('Nova senha (mínimo 8 caracteres):');if(np===null)return;if(np.length<8){toast('A senha precisa ter no mínimo 8 caracteres.');return;}window.mudarSenha(np).then(function(){toast('Senha alterada.');}).catch(function(e){toast(e.code==='auth/requires-recent-login'?'Saia da conta, entre de novo e tente outra vez.':'Não foi possível alterar a senha.');});return;}
   else if(act==='logout'){if(window.sair)window.sair();return;}
   else if(act==='mkconta'){
     var cnm=document.getElementById('cn').value.trim(),cem=document.getElementById('ce').value.trim(),cpw=document.getElementById('cs').value,cpf=document.getElementById('cp').value;
-    if(!cnm||!cem||cpw.length<6){toast('Preencha nome, e-mail e senha (mínimo 6 caracteres).');return;}
+    cem=cem.toLowerCase();if(!cnm||!/^[a-z0-9._-]{3,20}$/.test(cem)||cpw.length<8){toast('Preencha o nome, um usuário de 3 a 20 caracteres (letras minúsculas, números, ponto, hífen ou sublinhado) e uma senha de no mínimo 8 caracteres.');return;}
     if(!window.criarConta){toast('Disponível só no site publicado com o Firebase.');return;}
     toast('Criando a conta...');
-    window.criarConta(cnm,cem,cpw,cpf).then(function(){ev('conta','criou a conta de '+cnm+' ('+cpf+')');toast('Conta criada para '+cnm+'.');['cn','ce','cs'].forEach(function(i){var e=document.getElementById(i);if(e)e.value='';});}).catch(function(e){toast(e.code==='auth/email-already-in-use'?'Este e-mail já existe no Firebase.':e.code==='auth/invalid-email'?'E-mail inválido.':e.code==='auth/weak-password'?'Senha fraca.':'Não foi possível criar a conta.');});
+    window.criarConta(cnm,cem,cpw,cpf).then(function(){ev('conta','criou a conta de '+cnm+' ('+cpf+')');toast('Conta criada para '+cnm+'.');['cn','ce','cs'].forEach(function(i){var e=document.getElementById(i);if(e)e.value='';});}).catch(function(e){toast(e.code==='auth/email-already-in-use'?'Este usuário já existe.':e.code==='auth/invalid-email'?'Usuário inválido.':e.code==='auth/weak-password'?'Senha fraca.':'Não foi possível criar a conta.');});
     return;}
   else if(act==='rmacc'){var uu=USERS.filter(function(u){return u.id===id})[0];if(!uu||!confirm('Remover o acesso de '+(uu.name||'esta pessoa')+'? A conta deixa de funcionar no site.'))return;DB.doc('users/'+id).delete().then(function(){ev('conta','removeu o acesso de '+(uu.name||'alguém'));toast('Acesso removido.');}).catch(function(){toast('Não foi possível remover o acesso.');});return;}
   else if(act==='stab')stab=b.dataset.t;
@@ -651,7 +687,7 @@ document.addEventListener('click',function(e){
   else if(act==='copy'){try{navigator.clipboard.writeText(id).then(function(){toast('Código copiado.')},function(){toast('Código: '+id)});}catch(e){toast('Código: '+id);}return;}
   else if(act==='delask'&&c){delId=c.id;}
   else if(act==='delno'){delId=null;}
-  else if(act==='delyes'&&c){ev('ficha','excluiu a ficha '+c.name);if(DB&&S.room)DB.doc('rooms/'+S.room+'/chars/'+c.id).delete().catch(function(){});S.chars=S.chars.filter(function(x){return x.id!==c.id});S.open=S.open.filter(function(x){return x!==c.id});S.active=S.open.length?S.open[S.open.length-1]:null;delId=null;}
+  else if(act==='delyes'&&c){cloudDel(c);S.del=S.del||{};S.del[c.id]=1;ev('ficha','excluiu a ficha '+c.name);if(DB&&S.room)DB.doc('rooms/'+S.room+'/chars/'+c.id).delete().catch(function(){});S.chars=S.chars.filter(function(x){return x.id!==c.id});S.open=S.open.filter(function(x){return x!==c.id});S.active=S.open.length?S.open[S.open.length-1]:null;delId=null;}
   else if(act==='go')S.active=id;
   else if(act==='open'){if(S.open.indexOf(id)<0)S.open.push(id);S.active=id;}
   else if(act==='new'){showNew=true;}
@@ -682,6 +718,6 @@ document.addEventListener('change',function(e){
   save();render();
 });
 render();
-(function(){try{if(window.claude&&claude.use){claude.use('user').then(function(u){UR=u;return u?u.id():null;}).then(function(id){UID=id;}).catch(function(){}).then(function(){return claude.use('db');}).then(function(db){if(db){DB=db;sub();if(can('admin'))subAdmin();render();}}).catch(function(){});}}catch(e){}})();
+(function(){try{if(window.claude&&claude.use){claude.use('user').then(function(u){UR=u;return u?u.id():null;}).then(function(id){UID=id;}).catch(function(){}).then(function(){return claude.use('db');}).then(function(db){if(db){DB=db;sub();if(can('admin'))subAdmin();subCloud();render();}}).catch(function(){});}}catch(e){}})();
 </script>
 </body></html>
