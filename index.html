@@ -2,7 +2,7 @@
 <html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Mesa RPG</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;500;700;800&family=Cinzel:wght@500;700&display=swap">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;700&display=swap">
 <style>
 :root{--bg:#f0f4fb;--cd:#fff;--tx:#0f1c3f;--mu:#64748b;--bd:#e2e8f4;--in:#f3f6fc;--pr:#2563eb;--pr2:#60a5fa;--ok:#16a34a;--bad:#e11d48;--sh:0 1px 2px rgba(15,28,63,.06),0 8px 24px rgba(37,99,235,.07);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a1226;--cd:#111c3a;--tx:#e6edff;--mu:#93a3c7;--bd:#1f2f5c;--in:#0d1631;--sh:0 8px 24px rgba(0,0,0,.3);color-scheme:dark}}
@@ -309,6 +309,34 @@ aside{background:linear-gradient(180deg,#0b1b4a,#0a1438);border-right:0;box-shad
 .skr{display:inline-block;font-size:.82rem;color:var(--pr);font-weight:700}
 .skd{white-space:pre-wrap;font-size:.92rem;color:var(--mu);margin-top:2px}
 .xd{white-space:pre-wrap;font-size:10px;color:#334155;margin:1px 0 3px}
+.sec.sub{padding-top:2px;font-size:.72rem;opacity:.8}
+.pc{position:relative}
+.itm{border-top:1px solid var(--bd);padding:8px 0}.itm:first-of-type{border-top:0}
+.itr{display:flex;align-items:center;gap:8px}
+.itm .skn{flex:1;text-align:left}
+.eqb{border:1px solid var(--bd);background:var(--in);color:var(--mu);border-radius:10px;width:34px;height:34px;display:grid;place-items:center;flex:none;padding:0}
+.eqb .i{margin:0}
+.eqb.on{background:linear-gradient(135deg,#2563eb,#3b82f6);color:#fff;border-color:transparent;box-shadow:0 6px 14px rgba(37,99,235,.35)}
+.dtray{position:absolute;inset:0;z-index:3;background:rgba(8,16,48,.92);border-radius:18px;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding:8px;color:#fff}
+.dd{display:grid;justify-items:center;gap:2px;min-width:56px}
+.dd b{display:grid;place-items:center;width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#1d4ed8,#3b82f6);font:700 1.4rem Cinzel,serif;animation:rl .5s linear infinite}
+.dtray.done .dd b{animation:pop .3s}
+.dd small{font-size:.7rem;opacity:.9;text-align:center}
+.dsum{font:700 1rem Cinzel,serif;width:100%;text-align:center}
+.dtray.crit{background:rgba(110,70,0,.94);box-shadow:inset 0 0 40px rgba(245,183,61,.85)}
+.dtray.crit .dd b{background:linear-gradient(135deg,#f5b73d,#fde68a);color:#3a2a00}
+.dtray.fum .dd b{background:linear-gradient(135deg,#be123c,#fb7185)}
+#mtray{position:relative}#mtray:not(:empty){margin-bottom:12px}
+#mtray .dtray{position:static;border-radius:18px;padding:12px}
+@font-face{font-family:"Cinzel";src:local("Palatino Linotype"),local("Palatino"),local("Book Antiqua"),local("Georgia");font-weight:100 900}
+.colh{cursor:pointer;user-select:none}
+.colh::before{content:"▾";margin-right:6px;opacity:.55;font-size:.8em}
+.cd.col .colh::before{content:"▸"}
+.cd.col>*{display:none}
+.cd.col>h3{display:block}
+.cd.col>.head2{display:flex}
+@media (min-width:901px){.app.mini{grid-template-columns:72px 1fr}.mini aside{padding:22px 8px;align-items:center;overflow:visible}.mini .nv{font-size:0;justify-content:center;padding:10px}.mini .nv>.i,.mini .nv>.av{margin-right:0}.mini .sec,.mini .brand span:last-child,.mini aside::after{display:none}.mini .brand{justify-content:center;padding:0 0 18px}.mini .bdg{font-size:.62rem;margin-left:2px}}
+@media (max-width:900px){[data-act="sb"]{display:none}}
 </style></head>
 <body>
 <div id="toast" class="toast" hidden></div>
@@ -400,7 +428,7 @@ var AT=[['des','Destreza'],['int','Intuição'],['vig','Vigor'],['von','Vontade'
 var ST=['Lento','Tonto','Fraco','Abalado','Enfurecido','Envenenado'];
 var draft={name:'',photo:''},showNew=false;
 var get=function(id){return S.chars.filter(function(c){return c.id===id})[0]};
-var mx=function(c){var b=cb(c);return{hp:c.level+5*c.a.vig+b.hp,mp:c.level+5*c.a.von+b.mp,ip:6+b.ip}};
+var mx=function(c){var b=cb(c),q=ib(c);return{hp:c.level+5*c.a.vig+b.hp+q.hp,mp:c.level+5*c.a.von+b.mp+q.mp,ip:6+b.ip}};
 var pct=function(v,m){return Math.max(0,Math.min(100,m?v/m*100:0))};
 function mk(name,photo){
   var c={id:Date.now().toString(36),name:name||'Sem nome',photo:photo||'',sys:'fabula',level:5,identity:'',theme:'',origin:'',
@@ -411,24 +439,26 @@ function ph(c){return '<div class="ph" style="'+(c.photo?'background-image:url('
 function av(c){return '<span class="av" style="'+(c.photo?'background-image:url('+c.photo+')':'')+'">'+(c.photo?'':hood())+'</span>';}
 function render(){
   var s='<div class="brand"><span class="logo">'+ic('sword')+'</span><span>Mesa RPG</span></div>'+
-    '<button class="nv'+(S.active===null?' on':'')+'" data-act="home">'+ic('users')+'Personagens</button>';
+    '<button class="nv'+(S.active===null?' on':'')+'" data-act="home">'+ic('users')+'Personagens</button><button class="nv" data-act="sb">'+ic('menu')+(S.sb?'Expandir menu':'Recolher menu')+'</button>';
   if(S.open.length)s+='<div class="sec">Fichas abertas</div>';
   S.open.forEach(function(id){var c=get(id);if(!c)return;
     s+='<div class="nv'+(S.active===id?' on':'')+'" data-act="go" data-id="'+id+'" role="button" tabindex="0">'+av(c)+'<span class="nm">'+esc(c.name)+(c.adm?' ('+esc(c.adm)+')':'')+'</span><button class="x" data-act="close" data-id="'+id+'" aria-label="Fechar aba">×</button></div>';});
+  if(can('mestre'))s+='<button class="nv'+(S.active==='mestre'?' on':'')+'" data-act="mestre">'+ic('scroll')+'Mapa do mestre</button>';
   s+='<div class="sec">Salas</div>';
-  S.rooms.forEach(function(r){s+='<button class="nv'+(S.active==='r:'+r.code?' on':'')+'" data-act="room" data-id="'+r.code+'"><span class="av">'+ic('hall')+'</span><span class="nm">'+esc(r.name)+'</span></button>';});
+  var gs={};S.rooms.forEach(function(r){var k=r.sys||'fabula';(gs[k]=gs[k]||[]).push(r);});
+  Object.keys(gs).forEach(function(k){s+='<div class="sec sub">'+(SYS[k]||k)+'</div>';gs[k].forEach(function(r){s+='<button class="nv'+(S.active==='r:'+r.code?' on':'')+'" data-act="room" data-id="'+r.code+'"><span class="av">'+ic('hall')+'</span><span class="nm">'+esc(r.name)+'</span></button>';});});
   s+='<button class="nv'+(S.active==='rooms'?' on':'')+'" data-act="rooms">'+ic('plus')+'Criar ou entrar em sala</button>';
   if(can('admin')&&DB)s+='<div class="sec">Administração</div><button class="nv'+(S.active==='admin'?' on':'')+'" data-act="admin">'+ic('shield')+'Contas e atualizações<span id="abdg" class="bdg" style="display:none"></span></button>';
   if(window.mudarSenha)s+='<button class="nv" data-act="pw">'+ic('pen')+'Alterar minha senha</button>';
   if(window.sair)s+='<button class="nv" data-act="logout">'+ic('users')+'Sair da conta</button>';
-  document.getElementById('side').innerHTML=s;bdg();
+  document.getElementById('side').innerHTML=s;bdg();sbApply();
   var rm=S.active&&S.active.indexOf('r:')===0?S.rooms.filter(function(r){return 'r:'+r.code===S.active})[0]:null;
   var c=!rm&&S.active!=='rooms'&&S.active&&get(S.active);
-  document.getElementById('top').innerHTML='<h1>'+(rm?esc(rm.name):c?esc(c.name):S.active==='rooms'?'Salas':S.active==='admin'?'Administração':'Personagens')+'</h1><span class="pill">'+ic('scroll')+(S.room&&DB?'Sala: '+esc(rname(S.room)):'Fabula Ultima')+'</span>';
-  document.getElementById('main').innerHTML=rm?roomPage2(rm):S.active==='admin'?adminUi():S.active==='rooms'?roomsHome():c?sheet(c):home();
+  document.getElementById('top').innerHTML='<h1>'+(rm?esc(rm.name):c?esc(c.name):S.active==='rooms'?'Salas':S.active==='admin'?'Administração':S.active==='mestre'?'Mapa do mestre':'Personagens')+'</h1><span class="pill">'+ic('scroll')+(S.room&&DB?'Sala: '+esc(rname(S.room)):'Fabula Ultima')+'</span>';
+  document.getElementById('main').innerHTML=rm?roomPage2(rm):S.active==='mestre'?mestreUi():S.active==='admin'?adminUi():S.active==='rooms'?roomsHome():c?sheet(c):home();decorate();
 }
 function home(){
-  var h='<div class="mini"><div class="cnt"><b>'+S.chars.filter(function(c){return !c.adm}).length+'</b><span>personagens</span></div>'+(can('player')?'<button class="btn" data-act="new">Novo personagem</button>':'<span class="note">Seu perfil só pode visualizar.</span>')+'</div>';
+  var h='<div class="mini"><div class="cnt"><b>'+S.chars.filter(function(c){return !c.adm&&c.id!=='mestre'}).length+'</b><span>personagens</span></div>'+(can('player')?'<button class="btn" data-act="new">Novo personagem</button>':'<span class="note">Seu perfil só pode visualizar.</span>')+'</div>';
   if(showNew){
     h+='<div class="cd"><h3>Novo personagem</h3><div class="row"><div><label>Nome (pode deixar para depois)</label><input class="in" id="dn" value="'+esc(draft.name)+'" maxlength="40"></div>'+
     '<div><label>Foto (opcional)</label><input class="in" type="file" accept="image/*" id="dp"></div>'+
@@ -438,7 +468,7 @@ function home(){
   }
   if(!S.chars.length&&!showNew)h+='<div class="cd empty">Nenhum personagem ainda. Crie o primeiro em “Novo personagem”.</div>';
   h+='<div class="profs">';
-  S.chars.forEach(function(c){if(c.adm)return;h+='<button class="prof" data-act="open" data-id="'+c.id+'">'+ph(c)+'<b>'+esc(c.name)+'</b><span class="note">Nível '+c.level+'</span></button>';});
+  S.chars.forEach(function(c){if(c.adm||c.id==='mestre')return;h+='<button class="prof" data-act="open" data-id="'+c.id+'">'+ph(c)+'<b>'+esc(c.name)+'</b><span class="note">Nível '+c.level+'</span></button>';});
   return h+'</div>';
 }
 function f(path,val,type,extra){return '<input class="in" data-f="'+path+'" '+(type==='n'?'type="number" data-n="1"':'')+' value="'+esc(val)+'" '+(extra||'')+'>';}
@@ -449,26 +479,26 @@ function sheet(c){c.eq=c.eq||{};base(c);clampHM(c);
     '<div class="nm"><label>Nome</label>'+f('name',c.name,'','maxlength="40"')+'</div>'+
     '<div style="flex:0 0 90px"><label>Nível</label>'+f('level',c.level,'n','min="5" max="60"')+'</div></div>'+
     ''+hdrRow(c)+'</div>';
-  left+=tabsHtml();
-  if(stab==='main')left+='<div class="res"><div class="cd'+hpFx(c)+'"><div class="ct hpc">'+ic('heart')+'Pontos de Vida</div><div class="big">'+f('hp',c.hp,'n','min="0" max="'+m.hp+'"')+'<span>/ '+m.hp+'</span></div><div class="meter hp"><i style="width:'+pct(c.hp,m.hp)+'%"></i></div>'+xrow(c,'hp')+'<p class="note" style="margin:8px 0 0">Crise abaixo de '+(Math.floor(m.hp/2)+1)+'</p></div>'+
+  if(!S.combat)left+=tabsHtml();
+  if(stab==='main'||S.combat)left+='<div class="res"><div class="cd'+hpFx(c)+'"><div class="ct hpc">'+ic('heart')+'Pontos de Vida</div><div class="big">'+f('hp',c.hp,'n','min="0" max="'+m.hp+'"')+'<span>/ '+m.hp+'</span></div><div class="meter hp"><i style="width:'+pct(c.hp,m.hp)+'%"></i></div>'+xrow(c,'hp')+'<p class="note" style="margin:8px 0 0">Crise abaixo de '+(Math.floor(m.hp/2)+1)+'</p></div>'+
     '<div class="cd"><div class="ct mpc">'+ic('spark')+'Pontos de Mente</div><div class="big">'+f('mp',c.mp,'n','min="0" max="'+m.mp+'"')+'<span>/ '+m.mp+'</span></div><div class="meter mp"><i style="width:'+pct(c.mp,m.mp)+'%"></i></div>'+xrow(c,'mp')+'</div></div>';
-  if(stab==='main')left+='<div class="cd"><h3>Atributos</h3><div class="tiles t2">'+AT.map(function(a){return'<div class="tile atr"><label>'+ic(AI[a[0]])+a[1]+'</label><select class="in" data-f="a.'+a[0]+'" data-n="1">'+d.map(function(n){return'<option value="'+n+'"'+(c.a[a[0]]===n?' selected':'')+'>d'+n+'</option>'}).join('')+'</select>'+(eff(c,a[0])!==c.a[a[0]]?'<div class="note">efetivo: d'+eff(c,a[0])+'</div>':'')+'<button class="btn g sm" data-act="ua" data-k="'+a[0]+'">'+ic('dice')+'Usar na rolagem</button></div>'}).join('')+'</div>'+
-    '<div class="tiles t2" style="margin-top:12px"><div class="tile"><label>Defesa</label><b>'+eff(c,'des')+'</b></div><div class="tile"><label>Def. Mágica</label><b>'+eff(c,'int')+'</b></div><div class="tile ini"><label>Iniciativa</label><b>+0</b></div></div></div>';
-  if(stab==='main')left+=eqUi(c);
-  if(stab==='main')left+='<div class="cd"><h3>Recursos e condições</h3><div class="tiles"><div class="tile"><label>Espaços (máx.)</label><b>'+m.ip+'</b></div><div class="tile"><label>Pontos de Fabula</label>'+f('fp',c.fp,'n')+'</div><div class="tile"><label>Zenit</label>'+f('zenit',c.zenit,'n')+'</div></div>'+
+  if(stab==='main'&&!S.combat)left+='<div class="cd"><h3>Atributos</h3><div class="tiles t2">'+AT.map(function(a){return'<div class="tile atr"><label>'+ic(AI[a[0]])+a[1]+'</label><select class="in" data-f="a.'+a[0]+'" data-n="1">'+d.map(function(n){return'<option value="'+n+'"'+(c.a[a[0]]===n?' selected':'')+'>d'+n+'</option>'}).join('')+'</select>'+(eff(c,a[0])!==c.a[a[0]]?'<div class="note">efetivo: d'+eff(c,a[0])+'</div>':'')+'<button class="btn g sm" data-act="ua" data-k="'+a[0]+'">'+ic('dice')+'Usar na rolagem</button></div>'}).join('')+'</div>'+
+    '<div class="tiles t2" style="margin-top:12px"><div class="tile"><label>Defesa</label><b>'+(eff(c,'des')+ib(c).def)+'</b></div><div class="tile"><label>Def. Mágica</label><b>'+(eff(c,'int')+ib(c).mdef)+'</b></div><div class="tile ini"><label>Iniciativa</label><b>'+(ib(c).ini>=0?'+':'')+ib(c).ini+'</b></div></div></div>';
+  if(stab==='main'&&!S.combat)left+=eqUi(c);
+  if(S.combat)left+=condUi(c);
+  if(stab==='main'&&!S.combat)left+='<div class="cd"><h3>Recursos e condições</h3><div class="tiles"><div class="tile"><label>Pontos de Fabula</label>'+f('fp',c.fp,'n')+'</div><div class="tile"><label>Zenit</label>'+f('zenit',c.zenit,'n')+'</div></div>'+
     '<div class="chips" style="margin-top:14px">'+ST.map(function(s){return'<button class="chip'+(c.st.indexOf(s)>-1?' on':'')+'" data-act="st" data-s="'+s+'" title="'+PEND[s]+'">'+s+'</button>'}).join('')+'</div></div>';
-  if(stab==='skills')left+=clsUi(c)+spUi(c);
-  if(stab==='hist')left+=ta('hist',c.hist,'História do personagem')+ta('bonds',c.bonds,'Vínculos');
+  if(stab==='skills'||S.combat)left+=clsUi(c)+spUi(c);
+  if(stab==='hist')left+=ta('hist',c.hist,'História do personagem')+ta('bonds',c.bonds,'Vínculos')+ta('notes',c.notes,'Anotações')+delUi(c);
   if(stab==='inv')left+=ta('equip',c.equip,'Equipamento e inventário');
-  if(stab==='notes')left+=mapUi(c)+ta('notes',c.notes,'Anotações')+delUi(c);
   var opt=function(sel){return AT.map(function(a,i){return'<option value="'+a[0]+'"'+(i===sel?' selected':'')+'>'+a[1]+' (d'+c.a[a[0]]+')</option>'}).join('')};
   var right='<div class="cd aside2"><div class="head2"><h3>'+ic('dice')+'Rolagem de dados</h3><button class="btn g sm" data-act="mute">'+(S.mute?'Som desligado':'Som ligado')+'</button></div>'+roomSel()+'<div class="row"><div><label>Primeiro atributo</label><select class="in" id="r1">'+opt(0)+'</select></div><div><label>Segundo atributo</label><select class="in" id="r2">'+opt(1)+'</select></div><div><label>Bônus</label><input class="in" id="rb" type="number" value="0"></div></div>'+
     '<div class="dice"><button class="btn roll" data-act="roll">'+ic('dice')+'Rolar teste</button></div><div class="dice">'+[4,6,8,10,12,20].map(function(n){return'<button class="btn g dq" data-act="die" data-n="'+n+'">'+dIc(n)+'<span>d'+n+'</span></button>'}).join('')+'</div>'+
     '<div class="row" style="margin-top:12px"><div><label>Rolagem personalizada</label><input class="in" id="cr" placeholder="2d8 + 3"></div><button class="btn g" data-act="cust" style="flex:0 0 auto;align-self:flex-end">Rolar</button></div>'+'<ul class="log" id="log">'+logHtml()+'</ul><p class="note">'+(S.room&&DB?'Todos na sala veem as rolagens em tempo real.':'Sem sala, o histórico fica só neste navegador.')+'</p></div>';
-  return (stab==='main'||stab==='skills')?'<div class="cols"><div>'+left+'</div><div>'+right+'</div></div>':left;
+  return (stab==='main'||stab==='skills'||S.combat)?'<div class="cols"><div>'+left+'</div><div>'+right+'</div></div>':left;
 }
 var uc=null,RC=[],syT=null,stab='main',rtab='chars';
-var TABS=[['main','Principal'],['skills','Habilidades'],['hist','História'],['inv','Inventário'],['notes','Anotações']];
+var TABS=[['main','Principal'],['skills','Habilidades'],['hist','História'],['inv','Inventário']];
 var OP={};
 function clsUi(c){
   c.cls=c.cls||[];
@@ -509,7 +539,7 @@ function skBody(p,s,kind,i,j){
   '<div class="dice"><button class="btn" data-act="rollp" data-p="'+p+'">'+(s.nr?'Usar':'Rolar')+'</button><button class="btn g" data-act="'+(isS?'spdel':'skdel')+'" data-i="'+i+'" data-j="'+j+'">Remover</button></div></div>';
 }
 function skRow(g,j,key,s,p,kind,i,badge){var o=OP[key];return '<div class="sk drow" data-g="'+g+'" data-i="'+j+'"><div class="skh"><span class="gh">⠿</span><button class="skn" data-act="tog" data-k="'+key+'" title="'+esc(s.d)+'">'+(o?'▾ ':'▸ ')+esc(s.n||'Sem nome')+'</button><span class="badge">'+badge+'</span><button class="btn g sm" data-act="rollp" data-p="'+p+'">'+(s.nr?'Usar':'Rolar')+'</button></div>'+skInfo(s)+(o?skBody(p,s,kind,i,j):'')+'</div>';}
-function eqUi(c){
+function eqUiOld(c){
   if(!c.items){c.items=[];['main','off','armor','acc'].forEach(function(k){if(c.eq&&c.eq[k])c.items.push({n:c.eq[k],s:''})});}
   var m=mx(c),u=used(c);
   return '<div class="cd"><div class="head2"><h3>Equipamento</h3><button class="btn g" data-act="itadd">Adicionar item</button></div><div class="bl"><span>Bolsa</span><span>'+(Math.round(u*10)/10)+' / '+m.ip+' espaços</span></div><div class="meter bag'+(u>m.ip?' lo':'')+'"><i style="width:'+pct(u,m.ip)+'%"></i></div>'+
@@ -521,7 +551,7 @@ function clsUi(c){
   if(!c.cls.length)h+='<p class="note">Nenhuma classe ainda.</p>';
   c.cls.forEach(function(k,i){var pk='cls.'+i;
     h+='<div class="cls drow" data-g="cls" data-i="'+i+'"><div class="clh"><span class="gh">⠿</span>'+f(pk+'.n',k.n,'','placeholder="Nome da classe"')+'<div class="lv"><label>Nível</label>'+f(pk+'.lv',k.lv||1,'n','min="1"')+'</div><button class="x2" data-act="cldel" data-i="'+i+'" aria-label="Remover classe">×</button></div>'+
-    '<div class="cb"><span class="note">Bônus por nível:</span><label>PV'+f(pk+'.bhp',k.bhp||0,'n')+'</label><label>PM'+f(pk+'.bmp',k.bmp||0,'n')+'</label><label>Espaços'+f(pk+'.bip',k.bip||0,'n')+'</label></div>';
+    '<div class="cb"><span class="note">Bônus por nível:</span><label>PV'+f(pk+'.bhp',k.bhp||0,'n')+'</label><label>PM'+f(pk+'.bmp',k.bmp||0,'n')+'</label></div>';
     (k.sk||[]).forEach(function(s,j){h+=skRow(pk+'.sk',j,'k'+i+'.'+j,s,pk+'.sk.'+j,'cls',i,'Nv '+(s.lv||1)+(s.pm?' · '+s.pm+' PM':''));});
     h+='<button class="btn g" data-act="skadd" data-i="'+i+'" style="margin-top:10px">Adicionar habilidade</button></div>';});
   h+='</div>';
@@ -545,20 +575,20 @@ function subm(){
   us.forEach(function(x){x()});us=[];ROOM={};RM=[];SH=[];
   if(!DB||!S.room)return;var P='rooms/'+S.room;
   try{
-    us.push(DB.doc(P).onSnapshot(function(s){ROOM=s.data()||{};sceneNote();rr();if(S.active&&S.active.indexOf('r:')===0&&document.activeElement.tagName!=='TEXTAREA')render();},function(){}));
+    us.push(DB.doc(P).onSnapshot(function(s){ROOM=s.data()||{};rr();if(S.active&&S.active.indexOf('r:')===0&&document.activeElement.tagName!=='TEXTAREA')render();},function(){}));
     if(UID){DB.doc(P+'/members/'+UID).set({t:Date.now()}).catch(function(){});
       us.push(DB.collection(P+'/members').onSnapshot(function(q){RM=q.docs.map(function(x){return x.id});if(UR&&RM.length)UR.profiles(RM).then(function(ps){NM=ps||{};rr();});else rr();},function(){}));
       us.push(DB.collection(P+'/sheets').onSnapshot(function(q){SH=q.docs.map(function(x){var v=x.data();v.id=x.id;return v});var add=0;SH.forEach(function(v){if(v.owner===UID&&v.char&&!get(v.char.id)&&!(S.del&&S.del[v.char.id])){v.char.rem=S.room;S.chars.push(v.char);pushCloud(v.char);add++;}});if(add){save();render();}else rr();},function(){}));}
   }catch(e){}
 }
 function rr(){if(S.active&&S.active.indexOf('r:')===0&&rtab==='mesa'){var e=document.getElementById('mesa');if(e)e.innerHTML=mesaUi();}}
-function rtabs(){var t=[['chars','Personagens']];if(UID&&can('mestre')&&(can('admin')||!ROOM.master||ROOM.master===UID))t.push(['mesa','Fichas da mesa']);t.push(['scene','Cena']);if(can('mestre'))t.push(['npc','Bestiário'],['dice','Dados do mestre'],['notes','Anotações do mestre']);return t;}
+function rtabs(){var t=[['chars','Personagens']];if(UID&&can('mestre')&&(can('admin')||!ROOM.master||ROOM.master===UID))t.push(['mesa','Fichas da mesa']);return t;}
 function mesaUi(){
   if(!UID)return '<div class="cd empty">Sem identificação de usuário neste modo. Abra o site publicado, com a sua conta.</div>';
   if(!ROOM.master)return '<div class="cd"><h3>Mestre da sala</h3><p class="note">Esta sala ainda não tem mestre.</p><button class="btn" data-act="claim">Ser o mestre desta sala</button></div>';
   var nm=function(id){return (NM[id]&&NM[id].name)||('Jogador '+String(id).slice(0,4));};
   var opts=RM.map(function(id){return'<option value="'+id+'">'+esc(nm(id))+(id===UID?' (você)':'')+'</option>'}).join('');
-  var tpl='<option value="">Ficha em branco</option>'+S.chars.filter(function(c){return !c.adm}).map(function(c){return'<option value="'+c.id+'">Ficha pronta: '+esc(c.name)+'</option>'}).join('');
+  var tpl='<option value="">Ficha em branco</option>'+S.chars.filter(function(c){return !c.adm&&c.id!=='mestre'}).map(function(c){return'<option value="'+c.id+'">Ficha pronta: '+esc(c.name)+'</option>'}).join('');
   return '<div class="cd"><h3>Criar e entregar ficha</h3><div class="row"><div><label>Ficha para entregar</label><select class="in" id="mt">'+tpl+'</select></div><div><label>Nome do personagem</label><input class="in" id="mnm" maxlength="40"></div><div><label>Entregar para</label><select class="in" id="mp">'+opts+'</select></div></div><div class="dice"><button class="btn" data-act="deliver">Criar e entregar</button></div><p class="note">O jogador recebe a ficha na lista dele ao abrir o site com esta sala selecionada. Depois disso a ficha é dele.</p></div>'+
   '<div class="cd"><h3>Fichas entregues</h3>'+(SH.length?SH.map(function(v){return'<div class="item" style="grid-template-columns:1fr 1fr"><b>'+esc(v.char&&v.char.name)+'</b><select class="in" data-reown="'+v.id+'">'+RM.map(function(id){return'<option value="'+id+'"'+(v.owner===id?' selected':'')+'>'+esc(nm(id))+'</option>'}).join('')+'</select></div>'}).join(''):'<p class="note">Nenhuma ficha entregue ainda.</p>')+'</div>';
 }
@@ -570,7 +600,7 @@ function hdrRow(c){
   var m=mx(c),crise=c.hp<=Math.floor(m.hp/2),n=(c.st||[]).length;
   var chip='<span class="stt'+(crise?' bad':'')+'">'+ic(crise?'heart':'shield')+(crise?'Em crise':n?n+' condição(ões)':'Em forma')+'</span>';
   if(EH)return '<div class="row"><div><label>Identidade</label>'+f('identity',c.identity)+'</div><div><label>Tema</label>'+f('theme',c.theme)+'</div><div><label>Origem</label>'+f('origin',c.origin)+'</div><div class="eh" style="flex:0 0 auto"><button class="btn" data-act="eh">Concluir</button></div></div>';
-  return '<div class="idrow">'+[['Identidade',c.identity],['Tema',c.theme],['Origem',c.origin]].map(function(e){return'<span class="idc"><small>'+e[0]+'</small>'+(esc(e[1])||'—')+'</span>'}).join('')+chip+'<button class="btn g sm" data-act="pdf">'+ic('scroll')+'PDF</button><button class="btn g sm" data-act="eh">'+ic('pen')+'Editar</button></div>';
+  return '<div class="idrow">'+[['Identidade',c.identity],['Tema',c.theme],['Origem',c.origin]].map(function(e){return'<span class="idc"><small>'+e[0]+'</small>'+(esc(e[1])||'—')+'</span>'}).join('')+chip+'<button class="btn g sm" data-act="combat">'+(S.combat?'Sair do combate':'Modo combate')+'</button><button class="btn g sm" data-act="pdf">'+ic('scroll')+'PDF</button><button class="btn g sm" data-act="eh">'+ic('pen')+'Editar</button></div>';
 }
 function dIc(n){var P={4:'12,3 22,21 2,21',6:'4,4 20,4 20,20 4,20',8:'12,2 21,12 12,22 3,12',10:'12,2 21,9 17,22 7,22 3,9',12:'12,2 21,8 18,20 6,20 3,8',20:'12,2 21,7 21,17 12,22 3,17 3,7'};return '<svg class="di" viewBox="0 0 24 24" aria-hidden="true"><polygon points="'+P[n]+'"/><text x="12" y="'+(n===4?17:15)+'" text-anchor="middle">'+n+'</text></svg>';}
 function tm(t){if(!t)return '';var n=new Date(),x=new Date(t),p=function(v){return ('0'+v).slice(-2)};return (x.toDateString()===n.toDateString()?'Hoje':p(x.getDate())+'/'+p(x.getMonth()+1))+' '+p(x.getHours())+':'+p(x.getMinutes());}
@@ -583,7 +613,7 @@ var TXT=[['hist','a história'],['notes','as anotações'],['bonds','os vínculo
 function ev(type,txt){if(!DB||!UID)return;DB.collection('activity').add({ts:Date.now(),uid:UID,name:window.MYNAME||'Jogador',type:type,txt:txt}).catch(function(){});}
 function mkSnap(c){var t={};TXT.forEach(function(x){t[x[0]]=c[x[0]]||''});return {s:{'Nome':c.name,'Nível':c.level,'PV':c.hp,'PM':c.mp,'Pontos de Fabula':c.fp,'Zenit':c.zenit,'Destreza':c.a.des,'Intuição':c.a.int,'Vigor':c.a.vig,'Vontade':c.a.von,'Condições':(c.st||[]).join(', ')||'nenhuma','Itens':(c.items||[]).length,'Classes':(c.cls||[]).map(function(k){return (k.n||'?')+' '+(k.lv||1)}).join(', ')||'nenhuma','Magias':(c.spells||[]).length},t:t};}
 function base(c){if(!LAST[c.id])LAST[c.id]=mkSnap(c);}
-function actChk(){var c=S.active&&get(S.active);if(!c||!DB||!UID)return;var cur=mkSnap(c),pv=LAST[c.id];LAST[c.id]=cur;if(!pv)return;var p=[];Object.keys(cur.s).forEach(function(k){if(String(pv.s[k])!==String(cur.s[k]))p.push(k+': '+pv.s[k]+' → '+cur.s[k]);});TXT.forEach(function(x){if(pv.t[x[0]]!==cur.t[x[0]])p.push('editou '+x[1]);});if(p.length)ev('ficha','atualizou a ficha '+c.name+(c.adm?' da conta '+c.adm:'')+' ('+p.join('; ')+')');}
+function actChk(){var c=S.active&&get(S.active);if(!c||c.id==='mestre'||!DB||!UID)return;var cur=mkSnap(c),pv=LAST[c.id];LAST[c.id]=cur;if(!pv)return;var p=[];Object.keys(cur.s).forEach(function(k){if(String(pv.s[k])!==String(cur.s[k]))p.push(k+': '+pv.s[k]+' → '+cur.s[k]);});TXT.forEach(function(x){if(pv.t[x[0]]!==cur.t[x[0]])p.push('editou '+x[1]);});if(p.length)ev('ficha','atualizou a ficha '+c.name+(c.adm?' da conta '+c.adm:'')+' ('+p.join('; ')+')');}
 function actSoon(){clearTimeout(acT);acT=setTimeout(actChk,2500);}
 function subAdmin(){
   if(!DB||!can('admin'))return;
@@ -633,7 +663,7 @@ function loadFichas(){
   if(!DB||!can('admin'))return;
   FCH={};refreshF();
   USERS.forEach(function(u){var k=u.username||u.id;
-    DB.collection('contas/'+k+'/fichas').get().then(function(q){FCH[k]=q.docs.map(function(x){var d=x.data();return {id:x.id,name:d.name,level:d.level,hp:d.hp,mp:d.mp};});refreshF();}).catch(function(){FCH[k]=[];refreshF();});
+    DB.collection('contas/'+k+'/fichas').get().then(function(q){FCH[k]=q.docs.filter(function(x){return x.id!=='mestre'}).map(function(x){var d=x.data();return {id:x.id,name:d.name,level:d.level,hp:d.hp,mp:d.mp};});refreshF();}).catch(function(){FCH[k]=[];refreshF();});
   });
 }
 function fichasBody(){
@@ -673,15 +703,15 @@ function printHtml(c,L){
   var bar=function(l,v,mm,k){return '<div class="xbl"><span>'+l+'</span><span>'+v+' / '+mm+'</span></div><div class="xm '+k+'"><i style="width:'+pct(v,mm)+'%"></i></div>';};
   var at=AT.map(function(a){var e=eff(c,a[0]);return '<div class="xa"><small>'+a[1]+'</small><b>d'+e+'</b>'+(e!==c.a[a[0]]?'<small>base d'+c.a[a[0]]+'</small>':'')+'</div>';}).join('');
   var st=ST.map(function(x){return '<span class="xq'+(st0.indexOf(x)>-1?' on':'')+'">'+x+'</span>';}).join('');
-  var it=(c.items||[]).slice(0,18).map(function(i){return '<li><b>'+trm(i.n,40)+'</b>'+(i.s?' — '+trm(i.s,60):'')+' <em>('+(i.sp==null?1:i.sp)+')</em></li>';}).join('');
+  var it=(c.items||[]).slice(0,18).map(function(i){return '<li>'+(i.on?'● ':'')+'<b>'+trm(i.n,40)+'</b>'+(ibTxt(i)?' <em>'+ibTxt(i)+'</em>':'')+(i.s?'<div class="xd">'+trm(i.s,90)+'</div>':'')+'</li>';}).join('');
   var cl=(c.cls||[]).map(function(k){return '<div style="margin-bottom:3px"><b>'+trm(k.n||'Classe',30)+'</b> <em>Nv '+(k.lv||1)+'</em><ul>'+(k.sk||[]).map(function(s){return pItem(c,s,false,L);}).join('')+'</ul></div>';}).join('');
   var sp=(c.spells||[]).map(function(s){return pItem(c,s,true,L);}).join('');
   var tx=function(t,k){return c[k]?b(t,'<div class="xt">'+trm(c[k],L)+'</div>'):'';};
   var av=c.photo?'<div class="xav" style="background-image:url('+c.photo+')"></div>':'<div class="xav">'+hood()+'</div>';
   return '<div class="xh">'+av+'<div><div class="xn">'+trm(c.name,40)+'</div><div class="xs">Nível '+c.level+[c.identity,c.theme,c.origin].filter(Boolean).map(function(v){return ' · '+trm(v,30);}).join('')+'</div></div><div class="xr">Mesa RPG<br>Fabula Ultima</div></div>'+
   '<div class="xg"><div>'+b('Vida e mente',bar('Pontos de Vida'+(c.hpx?' (+'+c.hpx+')':''),c.hp,m.hp,'hp')+bar('Pontos de Mente'+(c.mpx?' (+'+c.mpx+')':''),c.mp,m.mp,'mp')+'<div class="xbl"><span>Fabula '+(c.fp||0)+'</span><span>Zenit '+(c.zenit||0)+'</span></div>')+
-  b('Atributos',at+'<div class="xbl" style="margin-top:4px"><span>Defesa <b>'+eff(c,'des')+'</b></span><span>Def. Mágica <b>'+eff(c,'int')+'</b></span><span>Inic. <b>+0</b></span></div>')+b('Condições',st)+'</div>'+
-  '<div>'+b('Equipamento',bar('Bolsa',u,m.ip,'bg')+(it?'<ul>'+it+'</ul>':'<em>Nenhum item.</em>'))+tx('Vínculos','bonds')+tx('Inventário (texto)','equip')+'</div>'+
+  b('Atributos',at+'<div class="xbl" style="margin-top:4px"><span>Defesa <b>'+(eff(c,'des')+ib(c).def)+'</b></span><span>Def. Mágica <b>'+(eff(c,'int')+ib(c).mdef)+'</b></span><span>Inic. <b>'+(ib(c).ini>=0?'+':'')+ib(c).ini+'</b></span></div>')+b('Condições',st)+'</div>'+
+  '<div>'+b('Equipamentos',(it?'<ul>'+it+'</ul>':'<em>Nenhum item.</em>'))+tx('Vínculos','bonds')+tx('Inventário (texto)','equip')+'</div>'+
   '<div>'+b('Classes e habilidades',cl||'<em>Nenhuma classe.</em>')+b('Magias',sp?'<ul>'+sp+'</ul>':'<em>Nenhuma magia.</em>')+'</div></div>'+
   tx('História','hist')+tx('Anotações','notes');
 }
@@ -712,7 +742,8 @@ function snd(kind){
     else{tone(180,.12,0,'triangle',.2);}
   }catch(e){}
 }
-function rollFx(r,done){if(r.kind==='use'){done();return;}
+function rollFx(r,done){var cr=(r.kind==='test'&&r.x===r.y&&r.x>=6),fu=(r.kind==='test'&&r.x===1&&r.y===1);snd(cr?'crit':fu?'fail':r.kind==='use'?'end':'roll');done();}
+function rollFxOld(r,done){if(r.kind==='use'){done();return;}
   var crit=(r.kind==='test'&&r.x===r.y&&r.x>=6),fum=(r.kind==='test'&&r.x===1&&r.y===1);
   var red=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(RB||red){done();snd(crit?'crit':fum?'fail':'end');return;}
@@ -732,17 +763,7 @@ function rollFx(r,done){if(r.kind==='use'){done();return;}
 }
 function hpFx(c){var m=mx(c),r='';if(c.hp<=Math.floor(m.hp/2))r+=' crise';if(PH[c.id]!=null&&c.hp<PH[c.id])r+=' shake';PH[c.id]=c.hp;return r;}
 function pcFx(p){var r='';if(p.hp<=Math.floor(p.mhp/2))r+=' crise';if(PH2[p.id]!=null&&p.hp<PH2[p.id])r+=' shake';PH2[p.id]=p.hp;return r;}
-function resizeBig(file,cb){var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var m=1100,sc=Math.min(1,m/Math.max(im.width,im.height)),cv=document.createElement('canvas');cv.width=Math.round(im.width*sc);cv.height=Math.round(im.height*sc);cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);var q=.75,u=cv.toDataURL('image/jpeg',q);while(u.length>700000&&q>.3){q-=.1;u=cv.toDataURL('image/jpeg',q);}cb(u);};im.src=r.result;};r.readAsDataURL(file);}
-function sceneUi(){
-  var sc=ROOM.scene,m=can('mestre')&&(!ROOM.master||ROOM.master===UID||can('admin'));
-  var h='<div class="cd"><h3>Cena atual</h3>'+(sc&&sc.img?'<img class="scimg" src="'+sc.img+'" alt="">'+(sc.title?'<p><b>'+esc(sc.title)+'</b></p>':''):'<p class="note">Nenhuma cena mostrada ainda.</p>')+'</div>';
-  if(m)h+='<div class="cd"><h3>Mostrar uma cena para a sala</h3><div class="row"><div><label>Imagem (foto, mapa ou arte)</label><input class="in" type="file" accept="image/*" id="sf"></div><div><label>Título (opcional)</label><input class="in" id="sct" maxlength="60"></div></div><div class="dice"><button class="btn" data-act="sceneshow">Mostrar para todos</button><button class="btn g" data-act="sceneclear">Limpar cena</button></div><p class="note">A imagem é reduzida automaticamente para ficar leve. Todos na sala veem na hora.</p></div>';
-  return h;
-}
-function showScene(sc){var el=document.getElementById('scv');if(!el){el=document.createElement('div');el.id='scv';document.body.appendChild(el);}el.innerHTML='<div class="scbox"><img src="'+sc.img+'" alt="">'+(sc.title?'<div class="sctt">'+esc(sc.title)+'</div>':'')+'<button class="btn" data-act="scclose">Fechar</button></div>';el.className='on';}
-function sceneNote(){var sc=ROOM.scene;if(!sc||!sc.img||!S.room)return;S.sc=S.sc||{};if(S.sc[S.room]===sc.ts)return;S.sc[S.room]=sc.ts;try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}showScene(sc);}
-var MS={sel:null,link:null,drag:null},NPCS=[],NO={},cnu=null;
-var NT=[['Em branco',[8,8,8,8]],['Soldado',[8,6,8,6]],['Bruto',[8,6,10,6]],['Atirador',[10,8,6,6]],['Mago',[6,10,6,10]],['Chefe',[10,10,12,10]]];
+var MS={sel:null,link:null,drag:null};
 function clampHM(c){var m=mx(c);c.hp=Math.max(0,Math.min(+c.hp||0,m.hp));c.mp=Math.max(0,Math.min(+c.mp||0,m.mp));}
 function xrow(c,k){return '<div class="xrw"><label>'+(k==='hp'?'PV':'PM')+' extra</label>'+f(k+'x',c[k+'x']||0,'n','min="0"')+f(k+'xn',c[k+'xn']||'','','placeholder="Origem (magia, buff...)" maxlength="40"')+'</div>';}
 function toggleEdge(c,a,b){var E=c.map.edges,i=-1;E.forEach(function(e,j){if((e[0]===a&&e[1]===b)||(e[0]===b&&e[1]===a))i=j;});if(i>-1)E.splice(i,1);else E.push([a,b]);}
@@ -760,31 +781,84 @@ document.addEventListener('pointerdown',function(e){var g=e.target.closest('.mn'
 document.addEventListener('pointermove',function(e){var d=MS.drag;if(!d)return;var c=get(S.active),svg=document.getElementById('mapsvg');if(!c||!c.map||!svg)return;if(Math.abs(e.clientX-d.x0)+Math.abs(e.clientY-d.y0)>6)d.mv=true;if(!d.mv)return;var pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;var q=pt.matrixTransform(svg.getScreenCTM().inverse()),n=c.map.nodes.filter(function(x){return x.id===d.id})[0];if(!n)return;n.x=Math.max(30,Math.min(670,Math.round(q.x)));n.y=Math.max(30,Math.min(440,Math.round(q.y)));mapDraw();});
 document.addEventListener('pointerup',function(e){var d=MS.drag;if(!d)return;MS.drag=null;var c=get(S.active);if(!c||!c.map)return;if(d.mv){save();return;}if(MS.link&&MS.link!==d.id){toggleEdge(c,MS.link,d.id);MS.link=null;}MS.sel=d.id;save();render();});
 document.addEventListener('pointercancel',function(){MS.drag=null;});
-function npcGet(id){return NPCS.filter(function(x){return x.id===id})[0];}
-function npcPush(n){if(!DB||!window.ACCT){toast('O bestiário só funciona no site com Firebase.');return;}var o=JSON.parse(JSON.stringify(n));delete o.id;DB.doc('contas/'+window.ACCT+'/npcs/'+n.id).set(o).catch(function(){toast('Não foi possível salvar o monstro.');});}
-function npcDel(id){NPCS=NPCS.filter(function(x){return x.id!==id});if(DB&&window.ACCT)DB.doc('contas/'+window.ACCT+'/npcs/'+id).delete().catch(function(){});}
-function npcSet(id,k,v){var n=npcGet(id);if(!n)return;n[k]=v;if(n.hp>n.hpm)n.hp=n.hpm;if(n.mp>n.mpm)n.mp=n.mpm;npcPush(n);render();}
-function subNpc(){if(cnu){cnu();cnu=null;}if(!DB||!window.ACCT||!can('mestre'))return;cnu=DB.collection('contas/'+window.ACCT+'/npcs').onSnapshot(function(q){NPCS=q.docs.map(function(x){var v=x.data();v.id=x.id;return v});var e=document.getElementById('npcs');if(e)e.innerHTML=npcUi();},function(){});}
-function nf(n,k,t,ex){return '<input class="in" data-npc="'+n.id+'" data-k="'+k+'" '+(t==='n'?'type="number" data-n="1"':'')+' value="'+esc(n[k]==null?'':n[k])+'" '+(ex||'')+'>';}
-function nta(n,k,l){return '<label style="margin-top:8px">'+l+'</label><textarea class="in" data-npc="'+n.id+'" data-k="'+k+'">'+esc(n[k])+'</textarea>';}
-function nds(n,k,l){return '<div><label>'+l+'</label><select class="in" data-npc="'+n.id+'" data-k="'+k+'" data-n="1">'+[6,8,10,12].map(function(d){return'<option value="'+d+'"'+(n[k]===d?' selected':'')+'>d'+d+'</option>'}).join('')+'</select></div>';}
-function npcBar(n,k,l,cl){return '<div class="bl"><span>'+l+'</span><span>'+(n[k]||0)+' / '+(n[k+'m']||0)+'</span></div><div class="meter '+cl+'"><i style="width:'+pct(n[k]||0,n[k+'m']||0)+'%"></i></div><div class="dice">'+[-5,-1,1,5].map(function(d){return'<button class="btn g sm" data-act="npchp" data-id="'+n.id+'" data-k="'+k+'" data-d="'+d+'">'+(d>0?'+':'')+d+'</button>'}).join('')+'</div>';}
-function npcCard(n){var o=NO[n.id];
-  return '<div class="cd"><div class="head2"><button class="skn" data-act="npctog" data-id="'+n.id+'">'+(o?'▾ ':'▸ ')+'<b>'+esc(n.n||'Sem nome')+'</b> <span class="note">'+esc(n.tp||'')+(n.tp?' · ':'')+'Nv '+(n.lv||1)+'</span></button><button class="btn bad sm" data-act="npcdel" data-id="'+n.id+'">Excluir</button></div>'+
-  npcBar(n,'hp','PV','hp')+npcBar(n,'mp','PM','mp')+'<div class="note" style="margin-top:6px">Defesa '+(n.df||0)+' · Def. Mág. '+(n.mdf||0)+' · DES d'+n.des+' · INT d'+n.int+' · VIG d'+n.vig+' · VON d'+n.von+'</div>'+(n.atk?'<div class="xt2">'+esc(n.atk)+'</div>':'')+
-  (o?'<div class="row" style="margin-top:8px"><div><label>Nome</label>'+nf(n,'n')+'</div><div><label>Tipo</label>'+nf(n,'tp')+'</div><div style="flex:0 0 80px"><label>Nível</label>'+nf(n,'lv','n')+'</div></div><div class="row" style="margin-top:8px"><div><label>PV máx.</label>'+nf(n,'hpm','n')+'</div><div><label>PM máx.</label>'+nf(n,'mpm','n')+'</div><div><label>Defesa</label>'+nf(n,'df','n')+'</div><div><label>Def. Mágica</label>'+nf(n,'mdf','n')+'</div></div><div class="row" style="margin-top:8px">'+nds(n,'des','Destreza')+nds(n,'int','Intuição')+nds(n,'vig','Vigor')+nds(n,'von','Vontade')+'</div>'+nta(n,'atk','Ataques e ações')+nta(n,'hab','Habilidades e magias')+nta(n,'nt','Anotações'):'')+'</div>';}
-function npcUi(){
-  if(!DB)return '<div class="cd empty">O bestiário só funciona no site publicado, com o Firebase.</div>';
-  var h='<div class="cd"><h3>Bestiário e NPCs</h3><div class="row"><div><label>Nível</label><input class="in" id="nl" type="number" value="5" min="1"></div><div><label>Tipo de monstro</label><select class="in" id="nt">'+NT.map(function(t,i){return'<option value="'+i+'">'+t[0]+'</option>'}).join('')+'</select></div><button class="btn" data-act="npcadd" style="flex:0 0 auto;align-self:flex-end">Criar</button></div><p class="note">Os tipos só preenchem os dados iniciais com a mesma regra das fichas dos jogadores. Ajuste tudo conforme o livro. Só você vê o bestiário.</p></div>';
-  NPCS.slice().sort(function(a,b){return String(a.n).localeCompare(String(b.n))}).forEach(function(n){h+=npcCard(n);});
-  if(!NPCS.length)h+='<p class="note">Nenhum monstro ainda.</p>';
-  return h;
-}
 function skInfo(s){
   var nm=function(k,d){var a=AT.filter(function(x){return x[0]===(k||d)})[0];return a?a[1]:'';};
   var r=s.nr?'Sem rolagem':'Rola '+nm(s.r1,'des')+' + '+nm(s.r2,'int')+(+s.rb?' '+(s.rb>0?'+':'')+s.rb:'');
   return '<div class="skinfo"><span class="skr">'+r+'</span>'+(s.d?'<div class="skd">'+esc(s.d)+'</div>':'')+'</div>';
 }
+var RFIRST=true,mtab='mapa',SYS={fabula:'Fabula Ultima'};
+function ib(c){var r={def:0,mdef:0,hp:0,mp:0,ini:0};(c.items||[]).forEach(function(i){if(i.on){r.def+=+i.bd||0;r.mdef+=+i.bmd||0;r.hp+=+i.bhp||0;r.mp+=+i.bmp||0;r.ini+=+i.bini||0;}});return r;}
+function ibTxt(i){var a=[],g=function(v,l){if(+v)a.push(l+' '+(v>0?'+':'')+v);};g(i.bd,'Def');g(i.bmd,'Def. Mág.');g(i.bhp,'PV');g(i.bmp,'PM');g(i.bini,'Inic.');return a.join(' · ');}
+function itBody(c,it,p){
+  var sel=function(k,v){return '<select class="in" data-f="'+p+'.'+k+'">'+AT.map(function(a){return'<option value="'+a[0]+'"'+(v===a[0]?' selected':'')+'>'+a[1]+'</option>'}).join('')+'</select>';};
+  var nb=function(k,l){return '<div><label>'+l+'</label>'+f(p+'.'+k,it[k]||0,'n')+'</div>';};
+  return '<div class="skb"><div class="row"><div style="flex:2 1 200px"><label>Nome</label>'+f(p+'.n',it.n)+'</div></div><label style="margin-top:8px">Detalhes</label><textarea class="in" data-f="'+p+'.s">'+esc(it.s)+'</textarea>'+
+  '<label style="margin-top:8px">Bônus quando equipado</label><div class="row">'+nb('bd','Defesa')+nb('bmd','Def. Mágica')+nb('bhp','PV máx.')+nb('bmp','PM máx.')+nb('bini','Iniciativa')+'</div>'+
+  '<label class="ck"><input type="checkbox" data-f="'+p+'.rl" data-b="2"'+(it.rl?' checked':'')+'> Este item rola dados (ex.: dano de uma espada)</label>'+
+  (it.rl?'<div class="row"><div><label>Atributo 1</label>'+sel('r1',it.r1||'des')+'</div><div><label>Atributo 2</label>'+sel('r2',it.r2||'int')+'</div><div style="flex:0 0 80px"><label>Bônus</label>'+f(p+'.rb',it.rb||0,'n')+'</div></div>':'')+'</div>';
+}
+function eqUi(c){
+  c.items=c.items||[];
+  var h='<div class="cd"><div class="head2"><h3>Equipamentos</h3><button class="btn g sm" data-act="itadd">Adicionar item</button></div>';
+  if(!c.items.length)h+='<p class="note">Nenhum item ainda.</p>';
+  c.items.forEach(function(it,i){var o=OP['i'+i],bt=ibTxt(it);
+    h+='<div class="itm drow" data-g="items" data-i="'+i+'"><div class="itr"><span class="gh">\u283f</span><button class="eqb'+(it.on?' on':'')+'" data-act="iteq" data-i="'+i+'" title="'+(it.on?'Em uso: clique para desequipar':'Clique para equipar')+'" aria-label="Equipar">'+ic('shield')+'</button><button class="skn" data-act="tog" data-k="i'+i+'">'+(o?'▾ ':'▸ ')+esc(it.n||'Item sem nome')+'</button>'+(it.rl?'<button class="btn g sm" data-act="itroll" data-i="'+i+'">'+ic('dice')+'Rolar</button>':'')+'<button class="x2" data-act="itdel" data-i="'+i+'" aria-label="Remover item">×</button></div>'+
+    ((it.s||bt)?'<div class="skinfo">'+(bt?'<span class="skr">'+bt+(it.on?'':' (não equipado)')+'</span>':'')+(it.s?'<div class="skd">'+esc(it.s)+'</div>':'')+'</div>':'')+(o?itBody(c,it,'items.'+i):'')+'</div>';});
+  return h+'</div>';
+}
+function trayFx(host,r){
+  if(!host||r.kind==='use')return;var old=host.querySelector('.dtray');if(old)old.remove();
+  var crit=(r.kind==='test'&&r.x===r.y&&r.x>=6),fum=(r.kind==='test'&&r.x===1&&r.y===1);
+  var ds=r.kind==='test'?[[r.l1,r.A,r.x],[r.l2,r.B,r.y]]:r.kind==='die'?[['d'+r.n,r.n,r.total]]:String(r.rs||'').split(', ').slice(0,6).map(function(v){return ['',20,+v];});
+  var t=document.createElement('div');t.className='dtray';
+  t.innerHTML=ds.map(function(x){return '<div class="dd"><b>?</b><small>'+esc(x[0]||'')+'</small></div>';}).join('')+'<div class="dsum"></div>';
+  host.appendChild(t);
+  var n=0,iv=setInterval(function(){var bs=t.querySelectorAll('.dd b');for(var i=0;i<bs.length;i++)bs[i].textContent=1+Math.floor(Math.random()*(ds[i][1]||6));
+    if(++n>=9){clearInterval(iv);for(var j=0;j<bs.length;j++)bs[j].textContent=ds[j][2];t.className='dtray done'+(crit?' crit':fum?' fum':'');t.querySelector('.dsum').textContent=(r.nm?r.nm+' ':'')+'= '+r.total+(crit?' · crítico!':fum?' · falha crítica':'');}},80);
+  setTimeout(function(){clearInterval(iv);if(t.parentNode)t.remove();},4500);
+}
+function rollSeen(r){
+  if(!r||r.kind==='use'||!r.ts||Date.now()-r.ts>8000)return;
+  var host=null;
+  if(r.who==='Mestre')host=document.getElementById('mtray');
+  else{var cs=document.querySelectorAll('.pc');for(var i=0;i<cs.length;i++){if(cs[i].dataset.cid===r.cid||(!r.cid&&cs[i].dataset.nm===r.who)){host=cs[i];break;}}}
+  trayFx(host,r);
+}
+function mlogHtml(){return (S.mlog||[]).map(function(l){return'<li>'+l+'</li>'}).join('')||'<li class="note">Nenhuma rolagem ainda.</li>';}
+function masterRoll(mr){
+  var crit=(mr.kind==='test'&&mr.x===mr.y&&mr.x>=6),fum=(mr.kind==='test'&&mr.x===1&&mr.y===1);
+  snd(crit?'crit':fum?'fail':'roll');
+  if(S.mrev)mr.rev=true;
+  S.mlog=S.mlog||[];S.mlog.unshift(rollHtml(mr));S.mlog=S.mlog.slice(0,40);save();
+  var ul=document.getElementById('mlogul');if(ul)ul.innerHTML=mlogHtml();
+  if(S.mrev&&DB&&S.room)DB.collection('rooms/'+S.room+'/rolls').add(mr).catch(function(){toast('Não foi possível mostrar a rolagem.');});
+  else trayFx(document.getElementById('mtray'),mr);
+}
+function mpanel(){
+  if(!(can('mestre')&&(!ROOM.master||ROOM.master===UID||can('admin'))))return '';
+  var fab=(ROOM.sys||'fabula')==='fabula';
+  var dsel=function(id,v){return '<select class="in" id="'+id+'">'+[6,8,10,12].map(function(d){return'<option value="'+d+'"'+(d===v?' selected':'')+'>d'+d+'</option>'}).join('')+'</select>';};
+  return '<div class="cd"><h3>Dados do mestre</h3>'+
+  (fab?'<div class="row"><div><label>Dado 1</label>'+dsel('md1',8)+'</div><div><label>Dado 2</label>'+dsel('md2',8)+'</div><div style="flex:0 0 80px"><label>Bônus</label><input class="in" id="mdb" type="number" value="0"></div><button class="btn" data-act="mtest" style="flex:0 0 auto;align-self:flex-end">'+ic('dice')+'Rolar 2 dados</button></div>':'')+
+  '<div class="dice">'+[4,6,8,10,12,20].map(function(n){return'<button class="btn g dq" data-act="mdie" data-n="'+n+'">'+dIc(n)+'<span>d'+n+'</span></button>'}).join('')+'</div>'+
+  '<label class="ck"><input type="checkbox" data-act="mrev"'+(S.mrev?' checked':'')+'> Mostrar as próximas rolagens para a sala</label><p class="note">Por padrão só você vê o resultado.</p><ul class="log" id="mlogul" style="max-height:160px">'+mlogHtml()+'</ul></div>';
+}
+function ensureMestre(){if(!get('mestre')){var c=mk('Mestre','');c.id='mestre';S.chars.push(c);}}
+IC.menu='<path d="M4 7h16M4 12h16M4 17h16"/>';
+function condUi(c){return '<div class="cd"><h3>Condições</h3><div class="chips">'+ST.map(function(s){return'<button class="chip'+((c.st||[]).indexOf(s)>-1?' on':'')+'" data-act="st" data-s="'+s+'" title="'+PEND[s]+'">'+s+'</button>'}).join('')+'</div></div>';}
+function sbApply(){var ap=document.querySelector('.app');if(ap)ap.classList.toggle('mini',!!S.sb);if(S.sb)document.querySelectorAll('#side .nv').forEach(function(e){e.title=e.textContent.trim();});}
+function decorate(){
+  var cds=document.querySelectorAll('#main .cd');
+  for(var i=0;i<cds.length;i++){var cd=cds[i],h=null,ch=cd.children;
+    for(var j=0;j<ch.length;j++){if(ch[j].tagName==='H3'){h=ch[j];break;}if(ch[j].classList.contains('head2')&&ch[j].querySelector('h3')){h=ch[j].querySelector('h3');break;}}
+    if(!h)continue;
+    var k=h.textContent.trim();h.dataset.col=k;h.classList.add('colh');
+    var v=(S.col||{})[k],ta=cd.querySelector('textarea');
+    if(v===undefined&&ta&&!ta.value&&ch.length<=2)v=true;
+    cd.classList.toggle('col',!!v);
+  }
+}
+function mestreUi(){ensureMestre();return mapUi(get('mestre'));}
 function tabsHtml(){return '<div class="tabs2">'+TABS.map(function(t){return'<button class="tb'+(stab===t[0]?' on':'')+'" data-act="stab" data-t="'+t[0]+'">'+ic(TI[t[0]])+t[1]+'</button>'}).join('')+'</div>';}
 function eqUiOld(c){
   if(!c.items){c.items=[];['main','off','armor','acc'].forEach(function(k){if(c.eq&&c.eq[k])c.items.push({n:c.eq[k],s:''})});}
@@ -793,9 +867,9 @@ function eqUiOld(c){
 }
 function syncSoon(){clearTimeout(syT);syT=setTimeout(syncChar,700);}
 function syncChar(){
-  var c=S.active&&get(S.active);if(!c||c.adm||!DB||!S.room)return;
+  var c=S.active&&get(S.active);if(!c||c.adm||c.id==='mestre'||!DB||!S.room)return;
   var m=mx(c);
-  DB.doc('rooms/'+S.room+'/chars/'+c.id).set({id:c.id,name:c.name,photo:c.photo||'',level:c.level,a:{des:eff(c,'des'),int:eff(c,'int'),vig:eff(c,'vig'),von:eff(c,'von')},hp:c.hp,mp:c.mp,mhp:m.hp,mmp:m.mp,fp:c.fp,st:c.st,upd:Date.now()}).catch(function(){});
+  DB.doc('rooms/'+S.room+'/chars/'+c.id).set({id:c.id,name:c.name,photo:c.photo||'',level:c.level,a:{des:eff(c,'des'),int:eff(c,'int'),vig:eff(c,'vig'),von:eff(c,'von')},hp:c.hp,mp:c.mp,mhp:m.hp,mmp:m.mp,fp:c.fp,df:eff(c,'des')+ib(c).def,mdf:eff(c,'int')+ib(c).mdef,st:c.st,upd:Date.now()}).catch(function(){});
 }
 function subx(){
   if(uc){uc();uc=null;}RC=[];
@@ -806,15 +880,15 @@ function bar(l,v,m,lo){return '<div class="bl"><span>'+l+'</span><span>'+v+' / '
 function charCards(){
   if(!RC.length)return'<div class="cd empty">Nenhuma ficha na sala ainda. Quando um jogador abrir a ficha com esta sala selecionada, ela aparece aqui.</div>';
   return '<div class="grid2">'+RC.slice().sort(function(a,b){return String(a.name).localeCompare(String(b.name))}).map(function(p){
-    return '<div class="pc'+pcFx(p)+'"><div class="pch">'+(p.photo?'<img src="'+p.photo+'" alt="">':'<span class="pi">'+esc((p.name||'?').charAt(0))+'</span>')+'<div><b>'+esc(p.name)+'</b><div class="note">Nível '+p.level+'</div></div></div>'+
+    return '<div class="pc'+pcFx(p)+'" data-cid="'+esc(p.id)+'" data-nm="'+esc(p.name)+'"><div class="pch">'+(p.photo?'<img src="'+p.photo+'" alt="">':'<span class="pi">'+esc((p.name||'?').charAt(0))+'</span>')+'<div><b>'+esc(p.name)+'</b><div class="note">Nível '+p.level+'</div></div></div>'+
     '<div class="pat">'+['des','int','vig','von'].map(function(k,i){return'<span>'+['DES','INT','VIG','VON'][i]+'<b>d'+p.a[k]+'</b></span>'}).join('')+'</div>'+
     bar('Vida',p.hp,p.mhp,p.hp<=Math.floor(p.mhp/2))+bar('Mente',p.mp,p.mmp,false)+
-    '<div class="pat" style="margin-top:6px"><span>Defesa<b>'+p.a.des+'</b></span><span>Def. Mágica<b>'+p.a.int+'</b></span><span>Fabula<b>'+p.fp+'</b></span></div>'+
+    '<div class="pat" style="margin-top:6px"><span>Defesa<b>'+(p.df!=null?p.df:p.a.des)+'</b></span><span>Def. Mágica<b>'+(p.mdf!=null?p.mdf:p.a.int)+'</b></span><span>Fabula<b>'+p.fp+'</b></span></div>'+
     ((p.st||[]).length?'<div class="note">'+p.st.map(esc).join(', ')+'</div>':'')+'</div>';}).join('')+'</div>';
 }
 function roomPage2(r){
   var tb=rtabs().map(function(t){return'<button class="tb'+(rtab===t[0]?' on':'')+'" data-act="rtab" data-t="'+t[0]+'">'+t[1]+'</button>'}).join('');
-  var body=rtab==='npc'?'<div id="npcs">'+npcUi()+'</div>':rtab==='scene'?'<div id="scn">'+sceneUi()+'</div>':rtab==='mesa'?'<div id="mesa">'+mesaUi()+'</div>':rtab==='chars'?'<div id="rc">'+charCards()+'</div>':rtab==='dice'?'<div class="cd"><h3>Dados do mestre</h3><p class="note">Por padrão estas rolagens são secretas: só você vê. Marque abaixo para mostrar as próximas à sala.</p><label class="ck"><input type="checkbox" data-act="mrev"'+(S.mrev?' checked':'')+'> Mostrar as próximas rolagens para a sala</label><div class="dice">'+[4,6,8,10,12,20,100].map(function(n){return'<button class="btn g" data-act="mdie" data-n="'+n+'">d'+n+'</button>'}).join('')+'</div><ul class="log" style="max-height:none">'+((S.mlog||[]).map(function(l){return'<li>'+l+'</li>'}).join('')||'<li class="note">Nenhuma rolagem secreta ainda.</li>')+'</ul></div>':'<div class="cd"><h3>Anotações do mestre</h3><textarea class="in" id="mn" style="min-height:260px">'+esc((S.mn||{})[r.code]||'')+'</textarea><p class="note">Só você vê estas anotações. Elas ficam neste navegador.</p></div>';
+  var body=rtab==='mesa'?'<div id="mesa">'+mesaUi()+'</div>':rtab==='chars'?'<div id="mtray"></div>'+mpanel()+'<div id="rc">'+charCards()+'</div>':rtab==='dice'?'<div class="cd"><h3>Dados do mestre</h3><p class="note">Por padrão estas rolagens são secretas: só você vê. Marque abaixo para mostrar as próximas à sala.</p><label class="ck"><input type="checkbox" data-act="mrev"'+(S.mrev?' checked':'')+'> Mostrar as próximas rolagens para a sala</label><div class="dice">'+[4,6,8,10,12,20,100].map(function(n){return'<button class="btn g" data-act="mdie" data-n="'+n+'">d'+n+'</button>'}).join('')+'</div><ul class="log" style="max-height:none">'+((S.mlog||[]).map(function(l){return'<li>'+l+'</li>'}).join('')||'<li class="note">Nenhuma rolagem secreta ainda.</li>')+'</ul></div>':'<div class="cd"><h3>Anotações do mestre</h3><textarea class="in" id="mn" style="min-height:260px">'+esc((S.mn||{})[r.code]||'')+'</textarea><p class="note">Só você vê estas anotações. Elas ficam neste navegador.</p></div>';
   return '<div class="mesa"><div class="cd"><h3>Resultados</h3><ul class="log" style="max-height:60vh">'+logHtml()+'</ul><div class="tile" style="margin-top:12px"><label>Código da sala</label><b style="letter-spacing:.12em">'+esc(r.code)+'</b></div><div class="dice"><button class="btn g" data-act="copy" data-id="'+r.code+'">Copiar código</button><button class="btn g" data-act="leaveroom" data-id="'+r.code+'">Sair</button></div>'+rmUi(r)+'</div><div><div class="tabs2">'+tb+'</div>'+body+'</div></div>';
 }
 function rname(code){var r=S.rooms.filter(function(r){return r.code===code})[0];return r?r.name:'';}
@@ -826,15 +900,15 @@ function logHtml(){var a=(S.room&&DB)?R.filter(function(r){return r.who!=='Mestr
 function refreshLog(){document.querySelectorAll('.log').forEach(function(l){l.innerHTML=logHtml();});}
 function toast(t){var e=document.getElementById('toast');e.textContent=t;e.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){e.hidden=true},4500);}
 function sub(){subx();subm();
-  if(unsub){unsub();unsub=null;}R=[];
+  if(unsub){unsub();unsub=null;}R=[];RFIRST=true;
   if(!DB||!S.room){refreshLog();return;}
-  try{unsub=DB.collection('rooms/'+S.room+'/rolls').orderBy('ts','desc').limit(60).onSnapshot(function(q){R=q.docs.map(function(x){return x.data()});refreshLog();},function(){toast('A conexão com a sala caiu. Recarregue a página.');});}catch(e){}
+  try{unsub=DB.collection('rooms/'+S.room+'/rolls').orderBy('ts','desc').limit(60).onSnapshot(function(q){R=q.docs.map(function(x){return x.data()});q.docChanges().forEach(function(d){if(d.type==='added'&&!RFIRST)rollSeen(d.doc.data());});RFIRST=false;refreshLog();},function(){toast('A conexão com a sala caiu. Recarregue a página.');});}catch(e){}
 }
 function newCode(){var a='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',s='';for(var i=0;i<6;i++)s+=a.charAt(Math.floor(Math.random()*a.length));return s;}
 function roomSel(){if(!DB)return'';return '<div style="margin-bottom:12px"><label>Sala</label><select class="in" id="rs"><option value="">Sem sala (só eu)</option>'+S.rooms.map(function(r){return'<option value="'+r.code+'"'+(S.room===r.code?' selected':'')+'>'+esc(r.name)+'</option>'}).join('')+'</select></div>';}
 function roomsHome(){
   if(!DB)return'<div class="cd empty">As salas só funcionam no site publicado e para quem tem acesso a ele.</div>';
-  return '<div class="row"><div class="cd"><h3>Criar sala</h3><label>Nome da sala</label><input class="in" id="rn" maxlength="40" placeholder="Ex.: Campanha de sexta"><div class="dice"><button class="btn" data-act="mkroom">Criar sala</button></div></div>'+
+  return '<div class="row"><div class="cd"><h3>Criar sala</h3><label>Nome da sala</label><input class="in" id="rn" maxlength="40" placeholder="Ex.: Campanha de sexta"><label style="margin-top:8px">Sistema</label><select class="in" id="rsy"><option value="fabula">Fabula Ultima</option><option disabled>Outros sistemas em breve</option></select><div class="dice"><button class="btn" data-act="mkroom">Criar sala</button></div></div>'+
   '<div class="cd"><h3>Entrar com código</h3><label>Código da sala</label><input class="in" id="jc" maxlength="12" placeholder="Ex.: K7M2QX"><div class="dice"><button class="btn" data-act="joinroom">Entrar</button></div></div></div>';
 }
 function roomPage(r){
@@ -844,7 +918,7 @@ function delUi(c){return '<div class="cd" style="margin-top:16px"><h3>Excluir pe
 function d(n){return 1+Math.floor(Math.random()*n);}
 function pushLog(c,r){rollFx(r,function(){pushLog2(c,r);});}
 function pushLog2(c,r){
-  r.who=c.name;r.ts=Date.now();
+  r.who=c.name;r.cid=c.id;r.ts=Date.now();
   if(S.room&&DB){document.body.classList.add('busy');DB.collection('rooms/'+S.room+'/rolls').add(r).then(function(){document.body.classList.remove('busy')},function(){document.body.classList.remove('busy');toast('Seu perfil não pode rolar na sala.');});return;}
   S.log.unshift(rollHtml(r));S.log=S.log.slice(0,40);save();refreshLog();
 }
@@ -855,6 +929,7 @@ function resize(file,cb){
   r.readAsDataURL(file);
 }
 document.addEventListener('click',function(e){
+  var hh=e.target.closest('h3.colh');if(hh&&!e.target.closest('[data-act]')){var cd0=hh.closest('.cd'),now=!cd0.classList.contains('col');S.col=S.col||{};S.col[hh.dataset.col]=now;cd0.classList.toggle('col',now);save();return;}
   var b=e.target.closest('[data-act]');if(!b)return;
   var act=b.dataset.act,id=b.dataset.id,c=S.active&&get(S.active);
   if(act.indexOf('del')!==0)delId=null;if(act.indexOf('rm')!==0)RD=null;
@@ -865,18 +940,19 @@ document.addEventListener('click',function(e){
   else if(act==='atab'){atab=b.dataset.t;if(atab==='fichas')loadFichas();}
   else if(act==='pdf'&&c){exportPdf(c);return;}
   else if(act==='mute'){S.mute=!S.mute;}
+  else if(act==='combat'){S.combat=!S.combat;}
+  else if(act==='sb'){S.sb=!S.sb;}
+  else if(act==='iteq'&&c){var iq=c.items[+b.dataset.i];iq.on=!iq.on;}
+  else if(act==='itroll'&&c){var ir=c.items[+b.dataset.i];rollTest(c,ir.r1||'des',ir.r2||'int',+ir.rb||0,ir.n||'Item');return;}
+  else if(act==='mestre'){ensureMestre();S.active='mestre';}
+  else if(act==='mtab'){mtab=b.dataset.t;}
+  else if(act==='mtest'){var ma=+document.getElementById('md1').value,mb=+document.getElementById('md2').value,mbn=parseInt(document.getElementById('mdb').value,10)||0,mx1=d(ma),my1=d(mb);masterRoll({kind:'test',l1:'Dado 1',l2:'Dado 2',A:ma,B:mb,x:mx1,y:my1,bn:mbn,total:mx1+my1+mbn,who:'Mestre',ts:Date.now()});return;}
+  else if(act==='mdie'){var mn=+b.dataset.n;masterRoll({kind:'die',n:mn,total:d(mn),who:'Mestre',ts:Date.now()});return;}
   else if(act==='mrev'){S.mrev=!S.mrev;}
-  else if(act==='npcadd'){var nlv=Math.max(1,parseInt(document.getElementById('nl').value,10)||5),nti=+document.getElementById('nt').value,ndd=NT[nti][1],nnp={id:'m'+Date.now().toString(36),n:nti===0?'Novo monstro':NT[nti][0],tp:'',lv:nlv,des:ndd[0],int:ndd[1],vig:ndd[2],von:ndd[3],atk:'',hab:'',nt:''};nnp.hpm=nlv+5*nnp.vig;nnp.mpm=nlv+5*nnp.von;nnp.hp=nnp.hpm;nnp.mp=nnp.mpm;nnp.df=nnp.des;nnp.mdf=nnp.int;NPCS.push(nnp);NO[nnp.id]=true;npcPush(nnp);}
-  else if(act==='npcdel'){npcDel(id);}
-  else if(act==='npctog'){NO[id]=!NO[id];}
-  else if(act==='npchp'){var nh=npcGet(id),hk=b.dataset.k;if(nh){nh[hk]=Math.max(0,Math.min(nh[hk+'m']||0,(nh[hk]||0)+(+b.dataset.d)));npcPush(nh);}}
   else if(act==='madd'&&c){c.map=c.map||{nodes:[],edges:[]};var mid='n'+Date.now().toString(36);c.map.nodes.push({id:mid,x:350+Math.round(Math.random()*120-60),y:230+Math.round(Math.random()*100-50),n:'Novo nó',t:''});MS.sel=mid;}
   else if(act==='mlink'){MS.link=MS.link?null:MS.sel;}
   else if(act==='mdel'&&c&&c.map){var mdd=MS.sel;c.map.nodes=c.map.nodes.filter(function(x){return x.id!==mdd});c.map.edges=c.map.edges.filter(function(x){return x[0]!==mdd&&x[1]!==mdd});MS.sel=null;MS.link=null;}
   else if(act==='medge'&&c&&c.map){toggleEdge(c,b.dataset.a,b.dataset.b);}
-  else if(act==='scclose'){var sv=document.getElementById('scv');if(sv)sv.className='';return;}
-  else if(act==='sceneclear'){DB.doc('rooms/'+S.room).update({scene:null}).then(function(){toast('Cena removida.');}).catch(function(){toast('Não foi possível limpar a cena.');});return;}
-  else if(act==='sceneshow'){var sf=document.getElementById('sf').files[0];if(!sf){toast('Escolha uma imagem.');return;}resizeBig(sf,function(u){DB.doc('rooms/'+S.room).update({scene:{img:u,title:document.getElementById('sct').value.trim(),ts:Date.now(),by:UID}}).then(function(){toast('Cena enviada.');ev('sala','mostrou uma cena na sala');}).catch(function(){toast('Não foi possível enviar a cena.');});});return;}
   else if(act==='fload'){loadFichas();return;}
   else if(act==='admopen'){admOpen(b.dataset.a,b.dataset.id);return;}
   else if(act==='pw'){var np=prompt('Nova senha (mínimo 8 caracteres):');if(np===null)return;if(np.length<8){toast('A senha precisa ter no mínimo 8 caracteres.');return;}window.mudarSenha(np).then(function(){toast('Senha alterada.');}).catch(function(e){toast(e.code==='auth/requires-recent-login'?'Saia da conta, entre de novo e tente outra vez.':'Não foi possível alterar a senha.');});return;}
@@ -890,8 +966,8 @@ document.addEventListener('click',function(e){
     return;}
   else if(act==='rmacc'){var uu=USERS.filter(function(u){return u.id===id})[0];if(!uu||!confirm('Remover o acesso de '+(uu.name||'esta pessoa')+'? A conta deixa de funcionar no site.'))return;DB.doc('users/'+id).delete().then(function(){ev('conta','removeu o acesso de '+(uu.name||'alguém'));toast('Acesso removido.');}).catch(function(){toast('Não foi possível remover o acesso.');});return;}
   else if(act==='stab')stab=b.dataset.t;
-  else if(act==='itadd'&&c){c.items=c.items||[];c.items.push({n:'',s:''});}
-  else if(act==='itdel'&&c){c.items.splice(+b.dataset.i,1);}
+  else if(act==='itadd'&&c){c.items=c.items||[];c.items.push({n:'',s:''});OP['i'+(c.items.length-1)]=true;}
+  else if(act==='itdel'&&c){c.items.splice(+b.dataset.i,1);OP={};}
   else if(act==='tog'){OP[b.dataset.k]=!OP[b.dataset.k];}
   else if(act==='rollp'&&c){var o=getPath(c,b.dataset.p),cost=+o.pm||0;if(cost>c.mp){toast('PM insuficientes: faltam '+(cost-c.mp)+'.');return;}if(cost){c.mp-=cost;save();}if(o.nr){pushLog(c,{kind:'use',nm:o.n||'Habilidade',pm:cost});render();return;}rollTest(c,o.r1||'des',o.r2||'int',+o.rb||0,o.n||'');render();return;}
   else if(act==='eh'){EH=!EH;}
@@ -913,15 +989,15 @@ document.addEventListener('click',function(e){
   else if(act==='spadd'&&c){c.spells=c.spells||[];c.spells.push({n:'',pm:0,d:''});OP['s'+(c.spells.length-1)]=true;}
   else if(act==='spdel'&&c){c.spells.splice(+b.dataset.j,1);OP={};}
   else if(act==='rtab')rtab=b.dataset.t;
-  else if(act==='mdie'){var nn=+b.dataset.n,mr={kind:'die',n:nn,total:d(nn),who:'Mestre',ts:Date.now()};if(S.mrev)mr.rev=true;rollFx(mr,function(){if(S.mrev&&DB&&S.room)DB.collection('rooms/'+S.room+'/rolls').add(mr).catch(function(){toast('Não foi possível mostrar a rolagem.');});S.mlog=S.mlog||[];S.mlog.unshift(rollHtml(mr));S.mlog=S.mlog.slice(0,40);save();render();});return;}
+  else if(act==='mdieOld'){var nn=+b.dataset.n,mr={kind:'die',n:nn,total:d(nn),who:'Mestre',ts:Date.now()};if(S.mrev)mr.rev=true;rollFx(mr,function(){if(S.mrev&&DB&&S.room)DB.collection('rooms/'+S.room+'/rolls').add(mr).catch(function(){toast('Não foi possível mostrar a rolagem.');});S.mlog=S.mlog||[];S.mlog.unshift(rollHtml(mr));S.mlog=S.mlog.slice(0,40);save();render();});return;}
   else if(act==='room'){S.active='r:'+id;S.room=id;sub();}
   else if(act==='mkroom'){if(!can('mestre')){toast('Seu perfil não pode criar salas.');return;}
     var nm=(document.getElementById('rn').value||'').trim()||'Minha sala',code=newCode();
-    DB.doc('rooms/'+code).set({name:nm,created:Date.now(),master:UID||null}).then(function(){ev('sala','criou a sala '+nm);S.rooms.push({code:code,name:nm});S.room=code;S.active='r:'+code;save();sub();render();}).catch(function(){toast('Não foi possível criar a sala. Seu perfil precisa ser mestre ou admin.');});return;}
+    DB.doc('rooms/'+code).set({name:nm,sys:(document.getElementById('rsy')||{}).value||'fabula',created:Date.now(),master:UID||null}).then(function(){ev('sala','criou a sala '+nm);S.rooms.push({code:code,name:nm,sys:'fabula'});S.room=code;S.active='r:'+code;save();sub();render();}).catch(function(){toast('Não foi possível criar a sala. Seu perfil precisa ser mestre ou admin.');});return;}
   else if(act==='joinroom'){
     var jc=(document.getElementById('jc').value||'').trim().toUpperCase();
     if(!/^[A-Z0-9]{3,12}$/.test(jc)){toast('Digite o código da sala, só letras e números.');return;}
-    DB.doc('rooms/'+jc).get().then(function(s){if(!s.exists){toast('Sala não encontrada. Confira o código.');return;}if(!S.rooms.some(function(r){return r.code===jc}))S.rooms.push({code:jc,name:s.data().name||jc});ev('sala','entrou na sala '+(s.data().name||jc));S.room=jc;S.active='r:'+jc;save();sub();render();}).catch(function(){toast('Não foi possível entrar na sala.');});return;}
+    DB.doc('rooms/'+jc).get().then(function(s){if(!s.exists){toast('Sala não encontrada. Confira o código.');return;}if(!S.rooms.some(function(r){return r.code===jc}))S.rooms.push({code:jc,name:s.data().name||jc,sys:s.data().sys||'fabula'});ev('sala','entrou na sala '+(s.data().name||jc));S.room=jc;S.active='r:'+jc;save();sub();render();}).catch(function(){toast('Não foi possível entrar na sala.');});return;}
   else if(act==='leaveroom'){S.rooms=S.rooms.filter(function(r){return r.code!==id});if(S.room===id){S.room=null;sub();}S.active='rooms';}
   else if(act==='copy'){try{navigator.clipboard.writeText(id).then(function(){toast('Código copiado.')},function(){toast('Código: '+id)});}catch(e){toast('Código: '+id);}return;}
   else if(act==='delask'&&c){delId=c.id;}
@@ -943,7 +1019,6 @@ document.addEventListener('click',function(e){
 });
 document.addEventListener('change',function(e){
   var t=e.target,c=S.active&&get(S.active);
-  if(t.dataset.npc){npcSet(t.dataset.npc,t.dataset.k,t.dataset.n?(parseFloat(t.value)||0):t.value);return;}
   if(t.dataset.role){var uu2=USERS.filter(function(u){return u.id===t.dataset.role})[0]||{};DB.doc('users/'+t.dataset.role).update({role:t.value}).then(function(){ev('conta','mudou o perfil de '+(uu2.name||'alguém')+' para '+t.value);}).catch(function(){toast('Não foi possível alterar o perfil.');});return;}
   if(t.dataset.reown){DB.doc('rooms/'+S.room+'/sheets/'+t.dataset.reown).update({owner:t.value}).catch(function(){toast('Não foi possível reatribuir.');});return;}
   if(t.id==='mn'){S.mn=S.mn||{};S.mn[S.room||'']=t.value;save();return;}
@@ -951,13 +1026,13 @@ document.addEventListener('change',function(e){
   if(t.id==='dp'&&t.files[0]){draft.name=document.getElementById('dn').value;resize(t.files[0],function(u){draft.photo=u;render();});return;}
   if(t.id==='cp'&&t.files[0]&&c){resize(t.files[0],function(u){c.photo=u;save();render();});return;}
   if(!t.dataset.f||!c)return;
-  var p=t.dataset.f.split('.'),o=c,v=t.dataset.b?!t.checked:(t.dataset.n?(parseFloat(t.value)||0):t.value);
+  var p=t.dataset.f.split('.'),o=c,v=t.dataset.b==='2'?t.checked:t.dataset.b?!t.checked:(t.dataset.n?(parseFloat(t.value)||0):t.value);
   for(var i=0;i<p.length-1;i++)o=o[p[i]];
   o[p[p.length-1]]=v;
   if(c.level<5)c.level=5;clampHM(c);
   save();render();
 });
 render();
-(function(){try{if(window.claude&&claude.use){claude.use('user').then(function(u){UR=u;return u?u.id():null;}).then(function(id){UID=id;}).catch(function(){}).then(function(){return claude.use('db');}).then(function(db){if(db){DB=db;sub();if(can('admin'))subAdmin();subCloud();subNpc();S.chars.forEach(function(c){if(c.adm&&can('admin'))admWatch(c.adm,c.id);});render();}}).catch(function(){});}}catch(e){}})();
+(function(){try{if(window.claude&&claude.use){claude.use('user').then(function(u){UR=u;return u?u.id():null;}).then(function(id){UID=id;}).catch(function(){}).then(function(){return claude.use('db');}).then(function(db){if(db){DB=db;sub();if(can('admin'))subAdmin();subCloud();S.chars.forEach(function(c){if(c.adm&&can('admin'))admWatch(c.adm,c.id);});render();}}).catch(function(){});}}catch(e){}})();
 </script>
 </body></html>
